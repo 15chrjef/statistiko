@@ -16,3 +16,4 @@ change_reserves.py
 get_orders.py
 profit.py
 output.log
+price_data.txt
