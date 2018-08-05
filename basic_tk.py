@@ -127,7 +127,7 @@ class Application(tk.Frame):
             print('context', context)
             f = open("price_data.txt", "a")
             f.write(json.dumps(context))
-            time.sleep(1)
+            time.sleep(60)
 
     def start_create_frame(self):
         self.run_remove_tables_prompts()
