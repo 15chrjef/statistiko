@@ -1,17 +1,17 @@
 from merkato.merkato_config import load_config, get_config, create_config
-from merkato.merkato import Merkato
 from merkato.parser import parse
-from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, drop_merkatos_table, drop_exchanges_table, insert_exchange
-from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt
+from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_exchange
+from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
 from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
-from gui.simple_app import enter_password
 
 import getpass
 import sqlite3
 import time
 import pprint
+import datetime
 import tkinter as tk
+import json
 
 # Yes, I know we need to abstract these out later. This is me hacking.
 def encrypt_keys(config, password=None):
@@ -73,9 +73,9 @@ def insert_config_into_exchanges(config):
     insert_exchange(exchange, public_key, private_key, limit_only)
 
 
-welcome_txt = """Welcome to Merkato Would you like to run current merkatos, or add a new exchange?."""
-exchange_added_text = "The Exchange has been added, would you like to run current merkatos, or add another exchange?"
-drop_merkatos_txt = "Do you want to drop merkatos?"
+welcome_txt = """Welcome to Statistiko Would you like to run current statistiko, or add a new exchange?."""
+exchange_added_text = "The Exchange has been added, would you like to run current statistikos, or add another exchange?"
+drop_merkatos_txt = "Do you want to drop statistikos?"
 drop_exchanges_txt = "Do you want to drop exchanges?"
 public_key_text = """Please enter your api public key"""
 private_key_text = """Please enter your api secret key"""
@@ -102,8 +102,8 @@ class Application(tk.Frame):
         welcome_message = tk.Label(self, anchor='n', padx = 10, text=message)
         welcome_message.pack(side="top")
       
-        run_merkatos = tk.Button(self, command=self.start_simple_app)
-        run_merkatos["text"] = "Run Merkatos"
+        run_merkatos = tk.Button(self, command=self.get_assets)
+        run_merkatos["text"] = "Run statistikos"
         run_merkatos.pack(side="top")
 
         create_new = tk.Button(self, command=self.start_create_frame)
@@ -114,10 +114,20 @@ class Application(tk.Frame):
         quit.pack(side="top")
 
 
-    def start_simple_app(self):
-        root.destroy()
-        enter_password()
-
+    def start_statistiko(self, password, base, quote, exchange):
+        self.remove_all_widgets()
+        exchange_config = get_exchange(exchange)
+        decrypt_keys(exchange_config, password)
+        exchange_class = get_relevant_exchange(exchange)
+        self.exchange = exchange_class(exchange_config, coin=quote, base=base)
+        while True:
+            now = str(datetime.datetime.now().isoformat()[:-7].replace("T", " "))
+            last_trade_price = self.exchange.get_last_trade_price()
+            context = {"price": (now, last_trade_price)}
+            print('context', context)
+            f = open("price_data.txt", "a")
+            f.write(json.dumps(context))
+            time.sleep(1)
 
     def start_create_frame(self):
         self.run_remove_tables_prompts()
@@ -266,11 +276,64 @@ class Application(tk.Frame):
 
 
     def submit_password(self, password):
+        self.remove_all_widgets()
         config = self.config
         encrypt_keys(config, password)
         insert_config_into_exchanges(config)
         decrypt_keys(config, password)
         self.create_widgets(exchange_added_text)
+
+    def enter_password(self, base, quote, exchange):
+        self.remove_all_widgets()
+        password_message = tk.Label(self, anchor='n', padx = 10, text="Enter password for decryption")
+        password_field = tk.Entry(self, width=40)
+        submit_password = tk.Button(self, command=lambda: self.start_statistiko(password_field.get(), base, quote, exchange))
+        submit_password["text"] = "Submit password"
+
+        password_message.pack(side="top")
+        password_field.pack(side="top")
+        submit_password.pack(side="bottom")
+        
+        
+
+    def get_assets(self):
+        self.remove_all_widgets()
+        password_message = tk.Label(self, anchor='n', padx = 10, text="Select Desired Assets")
+        base_label = tk.Label(self, anchor='n', padx = 10, text="Base Asset")
+        quote_label = tk.Label(self, anchor='n', padx = 10, text="Quote Asset")
+        exchange_label = tk.Label(self, anchor='n', padx = 10, text="Exchange")
+
+        BASE_OPTIONS = ["BTC","USDT","ETH"]
+        QUOTE_OPTIONS = ["XMR", "ETH", "PEPECASH"]
+        EXCHANGE_OPTIONS = ["bina", 'tux']
+
+        base_variable = tk.StringVar(self)
+        quote_variable = tk.StringVar(self)
+        exchange_variable = tk.StringVar(self)
+
+        base_variable.set(BASE_OPTIONS[0]) # default value
+        quote_variable.set(QUOTE_OPTIONS[0])
+        exchange_variable.set(EXCHANGE_OPTIONS[0])
+
+        base_menu = tk.OptionMenu(self, base_variable, *BASE_OPTIONS)
+        quote_menu = tk.OptionMenu(self, quote_variable, *QUOTE_OPTIONS)
+        exchange_menu = tk.OptionMenu(self, exchange_variable, *EXCHANGE_OPTIONS)
+
+        submit_password = tk.Button(self, command=lambda: self.enter_password(base_variable.get(), quote_variable.get(), exchange_variable.get()))
+        submit_password["text"] = "Submit"
+
+        submit_password.pack(side="bottom")
+        quote_menu.pack(side="bottom")
+        quote_label.pack(side="bottom")
+        base_menu.pack(side="bottom")
+        base_label.pack(side="bottom")
+        base_menu.pack(side="bottom")
+        base_label.pack(side="bottom")
+        exchange_menu.pack(side="bottom")
+        exchange_label.pack(side="bottom")
+
+        password_message.pack(side="top")
+
 
 root = tk.Tk()
 app = Application(master=root)

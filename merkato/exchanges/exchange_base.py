@@ -10,14 +10,6 @@ class ExchangeBase(ABC):
 	url = NotImplemented
 
 	@abstractmethod
-	def buy(self, amount, ask):
-		pass
-
-	@abstractmethod
-	def sell(self, amount, bid):
-		pass
-
-	@abstractmethod
 	def get_all_orders(self):
 		pass
 
