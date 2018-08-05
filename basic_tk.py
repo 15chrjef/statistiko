@@ -115,7 +115,7 @@ class Application(tk.Frame):
 
 
     def start_statistiko(self, password, base, quote, exchange):
-        self.remove_all_widgets()
+        root.destroy()
         exchange_config = get_exchange(exchange)
         decrypt_keys(exchange_config, password)
         exchange_class = get_relevant_exchange(exchange)
