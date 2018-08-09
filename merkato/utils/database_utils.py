@@ -39,7 +39,7 @@ def create_merkatos_table():
     finally:
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS merkatos
-                    (exchange text, exchange_pair text, base text, alt text, spread float, profit_limit integer, last_order text, first_order text, starting_price float, ask_reserved_balance float, bid_reserved_balance float, profit_margin integer, base_partials_balance integer, quote_partials_balance integer, quote_volume integer, base_volume integer)''')
+                    (exchange text, exchange_pair text, base text, alt text)''')
         c.execute('''CREATE UNIQUE INDEX id_exchange_pair ON merkatos (exchange_pair)''')
         conn.commit()
         conn.close()
@@ -64,7 +64,7 @@ def no_merkatos_table_exists():
         return number_of_mutex_tables == 0
 
 
-def insert_merkato(exchange, exchange_pair='tuxBTC_ETH', base='BTC', alt='XMR', spread='.1', bid_reserved_balance=0, ask_reserved_balance=0, first_order='', starting_price=.018, profit_limit=10, last_order='', profit_margin=0):
+def insert_merkato(exchange, exchange_pair='tuxBTC_ETH', base='BTC', alt='XMR'):
     ''' TODO: Function Comment
     '''
     try:
@@ -76,8 +76,8 @@ def insert_merkato(exchange, exchange_pair='tuxBTC_ETH', base='BTC', alt='XMR', 
     finally:
         c = conn.cursor()
         c.execute("""REPLACE INTO merkatos 
-                    (exchange, exchange_pair, base, alt, spread, profit_limit, last_order, first_order, starting_price, ask_reserved_balance, bid_reserved_balance, profit_margin, base_partials_balance, quote_partials_balance, starting_price, quote_volume, base_volume) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (exchange, exchange_pair, base, alt, spread, profit_limit, last_order, first_order, starting_price, ask_reserved_balance, bid_reserved_balance, profit_margin, 0, 0, 0, 0, 0))
+                    (exchange, exchange_pair, base, alt) VALUES (?,?,?,?)""",
+                    (exchange, exchange_pair, base, alt))
         conn.commit()
         conn.close()
 
@@ -223,6 +223,7 @@ def get_exchange(exchange):
     finally:
         c = conn.cursor()
         c.execute('''SELECT * FROM exchanges WHERE exchange = ?''', (exchange,))
+        print('exchange', exchange)
         exchange = c.fetchall()[0]
         conn.commit()
         conn.close()

@@ -20,7 +20,3 @@ class ExchangeBase(ABC):
 	@abstractmethod
 	def get_my_trade_history(self):
 		pass
-
-	@abstractmethod
-	def cancel_order(self, order_id):
-		pass

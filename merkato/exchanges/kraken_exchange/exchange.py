@@ -3,8 +3,7 @@ import requests
 import time
 from merkato.exchanges.exchange_base import ExchangeBase
 from merkato.constants import MARKET
-from binance.client import Client
-from binance.enums import *
+import krakenex
 from math import floor
 import logging
 from decimal import *
@@ -16,17 +15,15 @@ XMR_AMOUNT_PRECISION = 3
 XMR_PRICE_PRECISION = 6
 
 
-class BinanceExchange(ExchangeBase):
-    url = "https://api.binance.com"
-    #todo coin
+class KrakenExchange(ExchangeBase):
     def __init__(self, config, coin, base, password='password'):
-        self.client = Client(config['public_api_key'], config['private_api_key'])
+        self.client = krakenex.API(config['public_api_key'], config['private_api_key'])
         self.limit_only = config['limit_only']
         self.retries = 5
         self.coin = coin
         self.base = base
-        self.ticker = coin + base
-        self.name = 'bina'
+        self.ticker = coin + 'XBT'
+        self.name = 'Kraken'
 
     def get_all_orders(self):
         ''' Returns all open orders for the ticker XYZ (not BTC_XYZ)
@@ -67,14 +64,12 @@ class BinanceExchange(ExchangeBase):
             :param coin: string (of the format BTC_XYZ)
         '''
 
-        ticker = self.client.get_ticker(symbol=coin)
+        result = self.client.query_public('Ticker', {'pair': self.ticker})['result']
 
-        # if not coin:
-        #     return json.loads(response.text)
-        # response_json = json.loads(response.text)
-        log.info(ticker)
+        log.info(result)
 
-        return ticker
+        for ticker_data in result.values():
+            return ticker_data
 
 
     def get_24h_volume(self, coin=None):
@@ -134,19 +129,19 @@ class BinanceExchange(ExchangeBase):
     def get_last_trade_price(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["lastPrice"]
+        return self.get_ticker()["c"][0]
 
 
     def get_lowest_ask(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["askPrice"]
+        return self.get_ticker()["a"][0]
 
 
     def get_highest_bid(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["bidPrice"]
+        return self.get_ticker()["b"][0]
     
 
     def get_total_amount(self, order_id):

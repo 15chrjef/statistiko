@@ -2,6 +2,7 @@ import logging
 from merkato.exchanges.test_exchange.exchange import TestExchange
 from merkato.exchanges.tux_exchange.exchange import TuxExchange
 from merkato.exchanges.binance_exchange.exchange import BinanceExchange
+from merkato.exchanges.kraken_exchange.exchange import KrakenExchange
 from merkato.constants import known_exchanges
 from merkato.utils.database_utils import get_exchange as get_exchange_from_db, get_merkatos_by_exchange, get_merkato
 import base64
@@ -93,7 +94,8 @@ def get_relevant_exchange(exchange_name):
     exchange_classes = {
         'tux': TuxExchange,
         'test': TestExchange,
-        'bina': BinanceExchange
+        'bina': BinanceExchange,
+        'krak': KrakenExchange
     }
     return exchange_classes[exchange_name]
 

@@ -4,6 +4,7 @@ from merkato.utils.database_utils import no_merkatos_table_exists, create_merkat
 from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
 from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
+from merkato.exchanges.kraken_exchange.utils import validate_kraken
 
 import getpass
 import sqlite3
@@ -69,7 +70,7 @@ def insert_config_into_exchanges(config):
 
     if no_exchanges_table_exists():
         create_exchanges_table()
-
+    print('exchange', exchange)
     insert_exchange(exchange, public_key, private_key, limit_only)
 
 
@@ -229,6 +230,9 @@ class Application(tk.Frame):
         elif self.exchange == 'bina':
             credentials_are_valid = validate_keys(config)
 
+        elif self.exchange == 'krak':
+            credentials_are_valid = validate_kraken(config)
+
         else:
             "Exchange not supported, this should never happen"
             credentials_are_valid = False
@@ -255,6 +259,10 @@ class Application(tk.Frame):
 
         select_exchange_tux = tk.Button(self, command= lambda: self.choose_exchange('tux'))
         select_exchange_tux["text"] = "Tux"
+        select_exchange_tux.pack(side="bottom")
+
+        select_exchange_tux = tk.Button(self, command= lambda: self.choose_exchange('krak'))
+        select_exchange_tux["text"] = "Kraken"
         select_exchange_tux.pack(side="bottom")
 
 
@@ -305,7 +313,7 @@ class Application(tk.Frame):
 
         BASE_OPTIONS = ["BTC","USDT","ETH"]
         QUOTE_OPTIONS = ["XMR", "ETH", "PEPECASH"]
-        EXCHANGE_OPTIONS = ["bina", 'tux']
+        EXCHANGE_OPTIONS = ["bina", 'tux', 'krak']
 
         base_variable = tk.StringVar(self)
         quote_variable = tk.StringVar(self)
