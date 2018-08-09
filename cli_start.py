@@ -70,7 +70,6 @@ def insert_config_into_exchanges(config):
 
     if no_exchanges_table_exists():
         create_exchanges_table()
-    print('exchange', exchange)
     insert_exchange(exchange, public_key, private_key, limit_only)
 
 
@@ -120,10 +119,8 @@ class Application(tk.Frame):
         merkatos = get_all_merkatos()
         instances = []
         for merkato in merkatos:
-            print('merkato', merkato)
             exchange = get_exchange(merkato['exchange'])
-            print('exchange', exchange)
-            password = getpass.getpass('Enter password for {}'.format(merkato['exchange']))
+            password = getpass.getpass('Enter password for {}\n'.format(merkato['exchange']))
             decrypt_keys(exchange, password)
             exchange_class = get_relevant_exchange(merkato['exchange'])
             exchange_instance = exchange_class(exchange, coin=merkato['alt'], base=merkato['base'])
@@ -247,7 +244,7 @@ class Application(tk.Frame):
 
 
     def submit_password(self, exchange):
-        print('Enter password for {}'.format(exchange))
+        print('Enter password for {}\n\n'.format(exchange))
         password = getpass.getpass('Selection: ') 
         config = self.config
         encrypt_keys(config, password)
