@@ -6,5 +6,4 @@ tornado
 matplotlib
 cryptography
 python-binance
-websockets
 krakenex
