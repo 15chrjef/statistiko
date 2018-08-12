@@ -63,13 +63,17 @@ class KrakenExchange(ExchangeBase):
             it will return the ticker data for all coins.
             :param coin: string (of the format BTC_XYZ)
         '''
-
-        result = self.client.query_public('Ticker', {'pair': self.ticker})['result']
-
-        log.info(result)
-
-        for ticker_data in result.values():
-            return ticker_data
+        attempts = 0
+        while attempts < 4:
+            try:
+                result = self.client.query_public('Ticker', {'pair': self.ticker})['result']
+                log.info(result)
+                for ticker_data in result.values():
+                    return ticker_data
+            except Exception as e:
+                print('Error getting trade price {}'.format(e))
+                print('Trying again attempt {}'.format(attempts + 2))
+                attempts += 1
 
 
     def get_24h_volume(self, coin=None):
