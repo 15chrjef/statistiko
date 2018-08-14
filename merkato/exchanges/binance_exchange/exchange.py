@@ -67,14 +67,19 @@ class BinanceExchange(ExchangeBase):
             :param coin: string (of the format BTC_XYZ)
         '''
 
-        ticker = self.client.get_ticker(symbol=coin)
+        attempt = 0
+        while attempt < self.retries:
+            try:
+                ticker = self.client.get_ticker(symbol=coin)
+                log.info(ticker)
+                return ticker                   
 
-        # if not coin:
-        #     return json.loads(response.text)
-        # response_json = json.loads(response.text)
-        log.info(ticker)
-
-        return ticker
+            except Exception as e:  # TODO - too broad exception handling
+                if attempt == self.retries - 1:
+                    raise ValueError(e)
+                else:
+                    log.info("get_ticker on {} FAILED - attempt {} of {}".format("binance", attempt, self.retries))
+                    attempt += 1
 
 
     def get_24h_volume(self, coin=None):
