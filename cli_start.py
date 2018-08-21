@@ -134,7 +134,7 @@ class Application(tk.Frame):
                 context = {"price": (now, last_trade_price)}
                 print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)
                 f = open("price_data.txt", "a")
-                f.write(json.dumps(context))
+                f.write(json.dumps(context)+ '\n')
             time.sleep(60)
 
     
