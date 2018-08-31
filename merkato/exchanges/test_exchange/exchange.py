@@ -96,10 +96,10 @@ class TestExchange(ExchangeBase):
 
     def generate_fake_data(self, delta_range=[-3,3]):
         #positive_or_negative = [-.2, .2]
-        self.debug(3,"test exchange.py gen fake data", self.price)
+        # self.debug(3,"test exchange.py gen fake data", self.price)
         #self.price = abs(self.price * (1 + random.randint(*delta_range) / 100))  # percent walk of price, never < 0
         self.price = float(self.history[self.index]['price'][1])
-        self.debug(3, "test exchange.py gen fake data: new price", self.price)
+        # self.debug(3, "test exchange.py gen fake data: new price", self.price)
         new_orders = self.orderbook.generate_fake_orders(self.price)        
         if new_orders:
             self.order_history.extend(new_orders)
@@ -134,7 +134,6 @@ class TestExchange(ExchangeBase):
         combined_orders.extend(my_filtered_asks)
         combined_orders.extend(my_filtered_bids)
 
-        #print('combined_orders', combined_orders)
         my_open_orders = {}
 
         for order in combined_orders:
@@ -153,7 +152,7 @@ class TestExchange(ExchangeBase):
             self.debug(3, "get_my_trade_history", self.order_history, self.user_id)
             raise
 
-        print("Last 5 in Filtered History:", filtered_history[-5:])
+        # print("Last 5 in Filtered History:", filtered_history[-5:])
         filtered_history.reverse()
         return filtered_history 
 

@@ -42,7 +42,6 @@ class Orderbook:
 
         for order in self.resolved:
             if int(order['id']) == order_id:
-                print("In resolved")
                 return order
 
 

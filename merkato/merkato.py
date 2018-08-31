@@ -54,7 +54,7 @@ class Merkato(object):
 
         log.info("Creating New Merkato")
 
-        self.cancelrange(ONE_SATOSHI, ONE_BITCOIN)
+        # self.cancelrange(ONE_SATOSHI, ONE_BITCOIN)
 
         total_pair_balances = self.exchange.get_balances()
 
@@ -66,7 +66,7 @@ class Merkato(object):
         insert_merkato(configuration[EXCHANGE], self.mutex_UUID, base, coin, spread, bid_reserved_balance, ask_reserved_balance, first_order, starting_price)
         history = self.exchange.get_my_trade_history()
 
-        log.debug('initial history: {}'.format(history))
+        # log.debug('initial history: {}'.format(history))
 
         if len(history) > 0:
             log.debug('updating history first ID: {}'.format(history[0][ID]))
@@ -90,7 +90,7 @@ class Merkato(object):
         factor = self.spread*self.profit_margin/2
         ordered_transactions = new_txes
 
-        log.info('ordered transactions rebalanced: {}'.format(ordered_transactions))
+        # log.info('ordered transactions rebalanced: {}'.format(ordered_transactions))
 
         filled_orders = []
         market_orders = []
@@ -99,7 +99,7 @@ class Merkato(object):
             self.exchange.process_new_transactions(ordered_transactions)
 
         for tx in ordered_transactions:
-            log.info('Checking Transaction: {}\n'.format(tx))
+            # log.info('Checking Transaction: {}\n'.format(tx))
             orderid = tx['orderId']
             tx_id   = tx[ID]
             price   = tx[PRICE]
@@ -127,32 +127,32 @@ class Merkato(object):
 
             if tx[TYPE] == SELL:
                 buy_price = Decimal(price) * ( 1  - self.spread)
-                log.info("Found sell {} corresponding buy price: {} amount: {}".format(tx, buy_price, amount))
+                # log.info("Found sell {} corresponding buy price: {} amount: {}".format(tx, buy_price, amount))
 
                 market = self.exchange.buy(amount, buy_price)
                 # A lock is probably needed somewhere near here in case of unexpected shutdowns
 
                 if market == MARKET:
-                    log.info('MARKET ORDER buy {}'.format(market))
+                    # log.info('MARKET ORDER buy {}'.format(market))
                     market_orders.append((amount, buy_price, BUY, tx_id,))
 
                 self.apply_filled_difference(tx, total_amount)
 
                 is_round_trip = float(price) <= (float(self.starting_price) * float(1+(self.spread/2)))
                 if is_round_trip:
-                    log.info('Is round trip sell price: {}'.format(price))
+                    # log.info('Is round trip sell price: {}'.format(price))
                     self.base_volume += total_amount * Decimal(float(price))
                     update_merkato(self.mutex_UUID, BASE_VOLUME, float(self.base_volume))
 
             if tx[TYPE] == BUY:
                 sell_price = Decimal(price) * ( 1  + self.spread)
 
-                log.info("Found buy {} corresponding sell price: {} amount: {}".format(tx, sell_price, amount))
+                # log.info("Found buy {} corresponding sell price: {} amount: {}".format(tx, sell_price, amount))
 
                 market = self.exchange.sell(amount, sell_price)
                 
                 if market == MARKET:
-                    log.info('MARKET ORDER sell {}'.format(market))
+                    # log.info('MARKET ORDER sell {}'.format(market))
                     market_orders.append((amount, sell_price, SELL, tx_id))
 
                 self.apply_filled_difference(tx, total_amount)
@@ -160,12 +160,12 @@ class Merkato(object):
                 is_round_trip = float(price) >= (float(self.starting_price) * float((1-(self.spread/2))))
 
                 if is_round_trip:
-                    log.info('Is round trip buy price: {}'.format(price))
+                    # log.info('Is round trip buy price: {}'.format(price))
                     self.quote_volume += total_amount
                     update_merkato(self.mutex_UUID, QUOTE_VOLUME, float(self.quote_volume))
 
             if market != MARKET: 
-                log.info('NOT MARKET ORDER')
+                # log.info('NOT MARKET ORDER')
                 update_merkato(self.mutex_UUID, LAST_ORDER, tx[ID])
 
             filled_orders.append(orderid)
@@ -180,23 +180,23 @@ class Merkato(object):
             self.handle_market_order(*order)
 
         self.log_new_cointrackr_transactions(ordered_transactions)
-        log.info('ending partials base: {} quote: {}'.format(self.base_partials_balance, self.quote_partials_balance))
+        # log.info('ending partials base: {} quote: {}'.format(self.base_partials_balance, self.quote_partials_balance))
         return ordered_transactions
 
 
     def apply_filled_difference(self, tx, total_amount):
         filled_difference = total_amount - Decimal(tx['amount'])
-        log.info('apply_filled_difference tx: {} total_amount: {}'.format(tx, total_amount))
+        # log.info('apply_filled_difference tx: {} total_amount: {}'.format(tx, total_amount))
         tx_type = tx['type']
         if filled_difference > 0:
             if tx_type == SELL:
                 self.base_partials_balance -= filled_difference * Decimal(tx[PRICE])
                 update_merkato(self.mutex_UUID, 'base_partials_balance', float(self.base_partials_balance))
-                log.info('apply_filled_difference base_partials_balance: {}'.format(self.base_partials_balance))
+                # log.info('apply_filled_difference base_partials_balance: {}'.format(self.base_partials_balance))
             if tx_type == BUY:
                 self.quote_partials_balance -= filled_difference
                 update_merkato(self.mutex_UUID, 'quote_partials_balance', float(self.quote_partials_balance))
-                log.info('apply_filled_difference quote_partials_balance: {}'.format(self.quote_partials_balance))
+                # log.info('apply_filled_difference quote_partials_balance: {}'.format(self.quote_partials_balance))
 
 
     def decaying_bid_ladder(self, total_amount, step, start_price):
@@ -227,7 +227,7 @@ class Merkato(object):
             # TODO Create lock
             response = self.exchange.buy(current_bid_amount, current_bid_price)
 
-            log.info('bid response {}'.format(response))
+            # log.info('bid response {}'.format(response))
 
             self.remove_reserve(current_bid_total, BID_RESERVE) 
             # TODO Release lock
@@ -235,7 +235,7 @@ class Merkato(object):
             current_order += 1
             self.avoid_blocking()
 
-        log.info('allocated amount {}'.format(prior_reserve - self.bid_reserved_balance))
+        # log.info('allocated amount {}'.format(prior_reserve - self.bid_reserved_balance))
 
 
     def handle_is_in_filled_orders(self, tx):
@@ -249,7 +249,7 @@ class Merkato(object):
         if tx_type == SELL:
             self.base_partials_balance += filled_amount  * price
             update_merkato(self.mutex_UUID, 'base_partials_balance', float(self.base_partials_balance))
-        log.info('{}, orderid in filled_orders filled_amount: {} tx_id: {} '.format(tx_type, filled_amount, tx_id))
+        # log.info('{}, orderid in filled_orders filled_amount: {} tx_id: {} '.format(tx_type, filled_amount, tx_id))
         update_merkato(self.mutex_UUID, LAST_ORDER, tx_id)
 
 
@@ -304,7 +304,7 @@ class Merkato(object):
             # TODO Create lock
             response = self.exchange.sell(current_ask_amount, current_ask_price)
 
-            log.info('ask response {}'.format(response))
+            # log.info('ask response {}'.format(response))
 
             self.remove_reserve(current_ask_amount, ASK_RESERVE) 
             # TODO Release lock
@@ -312,7 +312,7 @@ class Merkato(object):
             current_order += 1
             self.avoid_blocking()
 
-        log.info('allocated amount: {}'.format(prior_reserve - self.ask_reserved_balance))
+        # log.info('allocated amount: {}'.format(prior_reserve - self.ask_reserved_balance))
 
 
     def distribute_asks(self, price, total_to_distribute):
@@ -349,7 +349,7 @@ class Merkato(object):
         # However, that amount is 'reserved' (will be placed on the books once the 
         # rest of the order is filled), and therefore is unavailable when creating new
         # Merkatos. Add this amount to a field 'quote_partials_balance'.
-        log.info('handle_partial_fill type {} filledqty {} tx_id {}'.format(type, filled_qty, tx_id))
+        # log.info('handle_partial_fill type {} filledqty {} tx_id {}'.format(type, filled_qty, tx_id))
         update_merkato(self.mutex_UUID, LAST_ORDER, tx_id)
         if type == BUY:
             self.quote_partials_balance += filled_qty # may need a multiply by price
@@ -363,7 +363,7 @@ class Merkato(object):
 
 
     def handle_market_order(self, amount, price, type_to_place, tx_id):
-        log.info('handle market order price: {}, amount: {}, type_to_place: {}'.format(price, amount, type_to_place))
+        # log.info('handle market order price: {}, amount: {}, type_to_place: {}'.format(price, amount, type_to_place))
         
         last_id_before_market = get_last_order(self.mutex_UUID)
 
@@ -388,7 +388,7 @@ class Merkato(object):
         amount_executed = Decimal(market_data['amount_executed'])
         price_numerator = Decimal(market_data['price_numerator'])
         last_txid    = market_data['last_txid']
-        log.info('market data: {}'.format(market_data))
+        # log.info('market data: {}'.format(market_data))
         update_merkato(self.mutex_UUID, LAST_ORDER, last_txid)
 
         market_order_filled = amount <= amount_executed
@@ -400,15 +400,15 @@ class Merkato(object):
                 price = price * Decimal(1 - self.spread)
                 self.exchange.buy(amount_executed, price)
         else:
-            log.info('handle_market_order: partials affected, amount: {} amount_executed: {}'.format(amount, amount_executed))
+            # log.info('handle_market_order: partials affected, amount: {} amount_executed: {}'.format(amount, amount_executed))
             if type_to_place == BUY:
                 self.quote_partials_balance += amount_executed
                 update_merkato(self.mutex_UUID, 'quote_partials_balance', float(self.quote_partials_balance))
-                log.info('market buy partials after: {}'.format(self.quote_partials_balance))
+                # log.info('market buy partials after: {}'.format(self.quote_partials_balance))
             else:
                 self.base_partials_balance += amount_executed * price_numerator
                 update_merkato(self.mutex_UUID, 'base_partials_balance', float(self.base_partials_balance))
-                log.info('market sell partials after {}'.format(self.base_partials_balance))
+                # log.info('market sell partials after {}'.format(self.base_partials_balance))
         # A market buy occurred, so we need to update the db with the latest tx
 
     def get_context_history(self):
@@ -438,7 +438,7 @@ class Merkato(object):
     def update(self):
         ''' TODO: Function comment
         '''
-        log.info("Update entered\n")
+        # log.info("Update entered\n")
         
         now = str(datetime.datetime.now().isoformat()[:-7].replace("T", " "))
         last_trade_price = self.exchange.get_last_trade_price()
@@ -452,12 +452,12 @@ class Merkato(object):
         
         current_history = self.exchange.get_my_trade_history()
         new_history = get_new_history(current_history, last_order)
-        log.info('update new_history: {} first_order: {} last_order: {} \n'.format(new_history, first_order, last_order))
+        # log.info('update new_history: {} first_order: {} last_order: {} \n'.format(new_history, first_order, last_order))
         new_transactions = []
         
         if len(new_history) > 0:
-            log.info('we have new history')
-            log.debug("New transactions: {} \n".format(new_history))
+            # log.info('we have new history')
+            # log.debug("New transactions: {} \n".format(new_history))
 
             new_transactions = self.rebalance_orders(new_history)
             #self.merge_orders()
@@ -617,22 +617,17 @@ class Merkato(object):
             elif coin == self.exchange.base and order_type == BUY:
                 orderbook_sum += float(current_amount) * float(order_price)
 
-        print('orderbook sum', orderbook_sum)
         if coin == self.exchange.coin:
             old_reserves = self.ask_reserved_balance + self.quote_partials_balance
         else:
             old_reserves = self.bid_reserved_balance + self.base_partials_balance      
-        print('old_reserves', old_reserves, self.quote_partials_balance, self.base_partials_balance) 
         total_amount = Decimal(orderbook_sum) + old_reserves
-        print('total_amount', total_amount)
         return amount_to_add/total_amount
 
     def update_orders(self, coin, amount_to_add):
-        print('amount_to_add', amount_to_add, 'coin', coin)
         amount_to_add = Decimal(float(amount_to_add))
         self.check_balances_available(coin, amount_to_add)
         add_percentage = self.calculate_add_percentage(coin, amount_to_add)
-        print('add percentage', add_percentage)
         if coin == self.exchange.coin:
             old_reserves = self.ask_reserved_balance + self.quote_partials_balance
         else:
@@ -643,26 +638,18 @@ class Merkato(object):
             order_type = order['type']
             order_price = Decimal(float(order['price']))
             amount_to_add = Decimal(float(current_amount * (1 + add_percentage)))
-            print('cancel order')
-            print('coin', coin, 'self.exchange.coin', self.exchange.coin, 'order_type', order_type )
             if coin == self.exchange.coin and order_type == SELL:
                 self.exchange.cancel_order(order['id'])
                 self.exchange.sell(amount_to_add, order_price)
-                print('replace sell')
             if coin == self.exchange.base and order_type == BUY:
                 self.exchange.cancel_order(order['id'])
                 self.exchange.buy(amount_to_add, order_price)
-                print('replace buy')
         if coin == self.exchange.coin:
-            print('old reserve balance', self.ask_reserved_balance)
             update_merkato(self.mutex_UUID, 'ask_reserved_balance', float(old_reserves * (1 + add_percentage)))
             self.ask_reserved_balance = Decimal(float(old_reserves * (1 + add_percentage)))
-            print('new reserve balances', self.ask_reserved_balance)
         elif coin == self.exchange.base:
-            print('old reserve balance', self.bid_reserved_balance )
             update_merkato(self.mutex_UUID, 'bid_reserved_balance', float(old_reserves * (1 + add_percentage)))
             self.bid_reserved_balance = Decimal(float(old_reserves * (1 + add_percentage)))
-            print('new reserve balances', self.bid_reserved_balance)
 
     def check_balances_available(self, coin, amoount_to_add):
         total_pair_balances = self.exchange.get_balances()
@@ -670,5 +657,4 @@ class Merkato(object):
         allocated_pair_balances = get_allocated_pair_balances(self.exchange.name, self.exchange.base, self.exchange.coin)
         ask_reserved_balance = self.ask_reserved_balance if coin == 'BTC' else self.ask_reserved_balance + amoount_to_add
         bid_reserved_balance = self.bid_reserved_balance + amoount_to_add if coin == 'BTC' else self.bid_reserved_balance
-        print('ask_reserved_balance', ask_reserved_balance, 'bid_reserved_balance', bid_reserved_balance)
         check_reserve_balances(total_pair_balances, allocated_pair_balances, coin_reserve=ask_reserved_balance, base_reserve=bid_reserved_balance)

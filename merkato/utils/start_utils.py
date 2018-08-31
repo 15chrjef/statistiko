@@ -57,5 +57,6 @@ def generate_tuner_config(step, spread, start_base, start_quote):
     config['ask_reserved_balance'] = start_quote
     config['bid_reserved_balance'] = start_base
     config['quote_volume'] = 0
+    config['step'] = step
     config['base_volume'] = 0
     return config

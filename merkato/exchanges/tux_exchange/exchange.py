@@ -153,7 +153,6 @@ class TuxExchange(ExchangeBase):
         while len(response) > 0 and 'initamount' not in response[0]:
             accumulator += 1
             response = self._create_signed_request(query_parameters)
-        print('accumulator', accumulator)
         filtered_history =  [trade for trade in response if self.ticker in trade["market_pair"]]
         return filtered_history
 

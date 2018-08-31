@@ -1,13 +1,13 @@
 DEBUG = True
 
 def apply_resolved_orders(current_accounts, resolved_orders):
-    if resolved_orders:
-        if DEBUG:
-            print("-----------------------")
-            print("current accounts:\n\n",current_accounts)
-            print("-----------------------")
-            print("resolved orders:\n\n",resolved_orders)
-            print("-----------------------")
+    # if resolved_orders:
+    #     if DEBUG:
+    #         print("-----------------------")
+    #         print("current accounts:\n\n",current_accounts)
+    #         print("-----------------------")
+    #         print("resolved orders:\n\n",resolved_orders)
+    #         print("-----------------------")
     for user_id, user in resolved_orders.items():
         #user_id = user["user_id"]
         user_is_not_in_accounts = user_id not in current_accounts

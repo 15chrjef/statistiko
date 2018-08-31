@@ -280,7 +280,6 @@ class Application(tk.Frame):
         print('Enter password for {}\n\n'.format(exchange))
         password = getpass.getpass('Selection: ') 
         config = self.config
-        print('config', config)
         encrypt_keys(config, password)
         insert_config_into_exchanges(config)
         decrypt_keys(config, password)
