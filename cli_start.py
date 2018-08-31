@@ -102,8 +102,9 @@ class Application(tk.Frame):
         print('Add Statistiko -> 2')
         print('Add Exchange -> 3')
         print('Run Tuner -> 4')
-        print('Drop Tables -> 5')
-        print('Quit -> 6')
+        print('Run All Tuners -> 5')
+        print('Drop Tables -> 6')
+        print('Quit -> 7')
         selection = input('Selection: ')
         self.handle_welcome_selection(selection)
 
@@ -119,6 +120,9 @@ class Application(tk.Frame):
             self.handle_start_tuner()
             return
         elif selection == '5':
+            self.handle_start_all_tuners()
+            return
+        elif selection == '6':
             self.drop_tables()
             return
         else:
@@ -129,6 +133,20 @@ class Application(tk.Frame):
         drop_exchanges_table()
         create_merkatos_table()
         create_exchanges_table()
+
+    def handle_start_all_tuners(self):
+        step = 1.0033
+        base = 10
+        quote = 636
+        results = []
+        for x in range(2, 19):
+            spread = (x / 2) / 100
+            (q_profit, b_profit) = start_tuner(step, spread, base, quote)
+            result = [spread, q_profit, b_profit]
+            results.append(result)
+        for result in results:
+            print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
+        
 
     def handle_start_tuner(self):
         step = get_tuner_params_step()

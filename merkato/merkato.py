@@ -522,7 +522,7 @@ class Merkato(object):
 
                 log.debug("price: {}".format(price))
 
-                time.sleep(.3)
+                # time.sleep(.3)
 
 
     def avoid_blocking(self):

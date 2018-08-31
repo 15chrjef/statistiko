@@ -40,7 +40,8 @@ def start_tuner(step, spread, start_base, start_quote):
             b_profit = base_volume * (float(spread) - .002)
             print("------------ qprofit: {} bprofit: {}".format(q_profit, b_profit))
             done = True
-
+            return q_profit, b_profit
+            
 def generate_tuner_config(step, spread, start_base, start_quote):
     config = {}
     inner_config = {"limit_only": True}
