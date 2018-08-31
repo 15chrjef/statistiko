@@ -129,7 +129,9 @@ class Application(tk.Frame):
             for instance in instances:
                 now = str(datetime.datetime.now().isoformat()[:-7].replace("T", " "))
                 last_trade_price = instance.get_last_trade_price()
-                if last_trade_price == None:
+                if last_trade_price == 'Error':
+                    f = open("price_data.txt", "a")
+                    f.write('Error'+ '\n')
                     continue
                 context = {"price": (now, last_trade_price)}
                 print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)

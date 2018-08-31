@@ -80,6 +80,7 @@ class BinanceExchange(ExchangeBase):
                 else:
                     log.info("get_ticker on {} FAILED - attempt {} of {}".format("binance", attempt, self.retries))
                     attempt += 1
+        return None
 
 
     def get_24h_volume(self, coin=None):
@@ -139,19 +140,28 @@ class BinanceExchange(ExchangeBase):
     def get_last_trade_price(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["lastPrice"]
+        ticker = self.get_ticker(self.ticker)
+        if ticker != None:
+            return ticker['lastPrice']
+        return 'Error'
 
 
     def get_lowest_ask(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["askPrice"]
+        ticker = self.get_ticker(self.ticker)
+        if ticker != None:
+            return ticker['askPrice']
+        return None
 
 
     def get_highest_bid(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker(self.ticker)["bidPrice"]
+        ticker = self.get_ticker(self.ticker)
+        if ticker != None:
+            return ticker['bidPrice']
+        return None
     
 
     def get_total_amount(self, order_id):

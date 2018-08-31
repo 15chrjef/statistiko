@@ -74,6 +74,7 @@ class KrakenExchange(ExchangeBase):
                 print('Error getting trade price {}'.format(e))
                 print('Trying again attempt {}'.format(attempts + 2))
                 attempts += 1
+        return None
 
 
     def get_24h_volume(self, coin=None):
@@ -133,20 +134,27 @@ class KrakenExchange(ExchangeBase):
     def get_last_trade_price(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker()["c"][0]
+        ticker = self.get_ticker()
+        if ticker != None:
+            return ticker["c"][0]
+        return 'Error'
 
 
     def get_lowest_ask(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker()["a"][0]
-
+        ticker = self.get_ticker()
+        if ticker != None:
+            return ticker["a"][0]
+        return None
 
     def get_highest_bid(self):
         ''' TODO Function Definition
         '''
-        return self.get_ticker()["b"][0]
-    
+        ticker = self.get_ticker()
+        if ticker != None:
+            return ticker["b"][0]
+        return None
 
     def get_total_amount(self, order_id):
         order_info = self.client.get_order(symbol=self.ticker, orderId=order_id, recvWindow=10000000)
