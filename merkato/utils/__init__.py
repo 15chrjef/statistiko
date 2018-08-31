@@ -228,6 +228,3 @@ def log_all_methods(cls):
         if callable(attr):
             setattr(cls, name, log_on_call(attr))
     return cls
-
-
-

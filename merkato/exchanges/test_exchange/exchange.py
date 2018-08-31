@@ -6,6 +6,7 @@ import requests
 import time
 import random
 import urllib.parse
+from decimal import *
 from merkato.exchanges.test_exchange.utils import apply_resolved_orders
 from merkato.exchanges.exchange_base import ExchangeBase
 from merkato.constants import BUY, SELL, PRICE, USER_ID, AMOUNT
@@ -14,11 +15,12 @@ from merkato.exchanges.test_exchange.constants import test_asks, test_bids
 from merkato.exchanges.tux_exchange.utils import translate_ticker
 
 class TestExchange(ExchangeBase):
-    def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password'):
+    def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password', limit_only=True):
         self.coin = coin
         self.base = base
+        self.name = "test"
         self.ticker = translate_ticker(coin=coin, base=base)
-        self.orderbook = Orderbook(test_bids, test_asks)
+        self.orderbook = Orderbook()
         self.user_id = user_id
         self.USER_ID = user_id
         self.user_accounts = accounts if accounts else {}
@@ -27,6 +29,9 @@ class TestExchange(ExchangeBase):
         self.retries = 3
         self.limit_only = True
         self.DEBUG = 3
+        self.history = []
+        self.index = 0
+        self.load_history()
         
     def debug(self, level, header, *args):
         if level <= self.DEBUG:
@@ -35,6 +40,14 @@ class TestExchange(ExchangeBase):
             for arg in args:
                 print("\t\t" + repr(arg))
             print("-" * 10)
+
+
+    def load_history(self):
+        with open("price_data.txt") as infile:
+            for line in infile:
+                obj = json.loads(line)
+                self.history.append(obj)
+                print(obj)
 
 
     def _sell(self, amount, ask,):
@@ -82,13 +95,15 @@ class TestExchange(ExchangeBase):
 
 
     def generate_fake_data(self, delta_range=[-3,3]):
-        positive_or_negative = [-.2, .2]
+        #positive_or_negative = [-.2, .2]
         self.debug(3,"test exchange.py gen fake data", self.price)
-        self.price = abs(self.price * (1 + random.randint(*delta_range) / 100))  # percent walk of price, never < 0
+        #self.price = abs(self.price * (1 + random.randint(*delta_range) / 100))  # percent walk of price, never < 0
+        self.price = float(self.history[self.index]['price'][1])
         self.debug(3, "test exchange.py gen fake data: new price", self.price)
         new_orders = self.orderbook.generate_fake_orders(self.price)        
         if new_orders:
             self.order_history.extend(new_orders)
+        self.index = self.index + 1
 
 
     def get_all_orders(self):
@@ -102,7 +117,7 @@ class TestExchange(ExchangeBase):
         }
 
 
-    def get_my_open_orders(self):
+    def get_my_open_orders(self, context_formatted=True):
         ''' Returns all open orders for the authenticated user '''
         # my_filtered_bids = list(filter(lambda order: order[USER_ID] == self.user_id, self.orderbook.bids))
         # my_filtered_asks = list(filter(lambda order: order[USER_ID] == self.user_id, self.orderbook.asks))
@@ -119,7 +134,7 @@ class TestExchange(ExchangeBase):
         combined_orders.extend(my_filtered_asks)
         combined_orders.extend(my_filtered_bids)
 
-        print('combined_orders', combined_orders)
+        #print('combined_orders', combined_orders)
         my_open_orders = {}
 
         for order in combined_orders:
@@ -127,16 +142,19 @@ class TestExchange(ExchangeBase):
             my_open_orders[order_id] = order
         return my_open_orders
 
-    def get_my_trade_history(self, orderid=0):
+    def get_my_trade_history(self):
         try:
             if not self.order_history:
                 return []
-            filtered_history = list(filter(lambda order: order[USER_ID] == self.USER_ID and int(order['orderid']) >= int(orderid), self.order_history))
+            filtered_history = list(filter(lambda order: order[USER_ID] == self.USER_ID, self.order_history))
         except ValueError:
             filtered_history = []
         except:
             self.debug(3, "get_my_trade_history", self.order_history, self.user_id)
             raise
+
+        print("Last 5 in Filtered History:", filtered_history[-5:])
+        filtered_history.reverse()
         return filtered_history 
 
 
@@ -172,9 +190,33 @@ class TestExchange(ExchangeBase):
         return pair_balances
 
 
+    def process_new_transactions(self, new_txs, context_only=False):
+        # New, possibly complete
+        pass
+
+
+    def is_partial_fill(self, order_id):
+        # New, should be complete
+        return False
+
+
+    def get_total_amount(self, order_id):
+        # New, possibly complete
+        order_info = self.get_order_info(order_id)
+        return Decimal(order_info['amount'])
+
+
+    def get_order_info(self, order_id):
+        # New, possibly complete
+        order_info = self.orderbook.get_order(order_id)
+        return order_info       
+
+
     def get_last_trade_price(self):
-        self.generate_fake_data()
-        return self.price
+        if self.index < len(self.history):
+            self.generate_fake_data()
+            return self.price
+        return "EOF"
 
 
     def get_lowest_ask(self):

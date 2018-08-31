@@ -2,6 +2,7 @@ from merkato.merkato_config import load_config, get_config, create_config
 from merkato.parser import parse
 from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_all_exchanges
 from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
+from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner
 from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
@@ -100,7 +101,9 @@ class Application(tk.Frame):
         print('Run Statistikos -> 1')
         print('Add Statistiko -> 2')
         print('Add Exchange -> 3')
-        print('Quit -> 4')
+        print('Run Tuner -> 4')
+        print('Drop Tables -> 5')
+        print('Quit -> 6')
         selection = input('Selection: ')
         self.handle_welcome_selection(selection)
 
@@ -112,13 +115,37 @@ class Application(tk.Frame):
             self.add_statistiko()
         elif selection == '3':
             self.add_exchange()
+        elif selection == '4':
+            self.handle_start_tuner()
+            return
+        elif selection == '5':
+            self.drop_tables()
+            return
         else:
             return
+
+    def drop_tables(self):
+        drop_merkatos_table()
+        drop_exchanges_table()
+        create_merkatos_table()
+        create_exchanges_table()
+
+    def handle_start_tuner(self):
+        step = get_tuner_params_step()
+        spread = get_tuner_params_spread()
+        base = get_tuner_params_base()
+        quote = get_tuner_params_quote()
+        print("Params gotten")
+        start_tuner(step, spread, base, quote)
+
 
     def start_statistikos(self):
         merkatos = get_all_merkatos()
         instances = []
         for merkato in merkatos:
+            print(merkato['exchange'])
+            if merkato['exchange'] == 'test':
+                continue
             exchange = get_exchange(merkato['exchange'])
             password = getpass.getpass('Enter password for {}\n'.format(merkato['exchange']))
             decrypt_keys(exchange, password)
@@ -253,6 +280,7 @@ class Application(tk.Frame):
         print('Enter password for {}\n\n'.format(exchange))
         password = getpass.getpass('Selection: ') 
         config = self.config
+        print('config', config)
         encrypt_keys(config, password)
         insert_config_into_exchanges(config)
         decrypt_keys(config, password)
