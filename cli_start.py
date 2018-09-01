@@ -138,7 +138,7 @@ class Application(tk.Frame):
         base = 10
         quote = 636
         results = []
-        for step_mult in range(0,4)
+        for step_mult in range(0,4):
             step = 1.003 + .002*step_mult
 
             for spread_mult in range(0,39):
