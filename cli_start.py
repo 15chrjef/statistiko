@@ -135,17 +135,24 @@ class Application(tk.Frame):
         create_exchanges_table()
 
     def handle_start_all_tuners(self):
-        step = 1.0033
         base = 10
         quote = 636
         results = []
-        for x in range(2, 19):
-            spread = (x / 2) / 100
-            (q_profit, b_profit) = start_tuner(step, spread, base, quote)
-            result = [spread, q_profit, b_profit]
-            results.append(result)
+        for step_mult in range(0,4)
+            step = 1.003 + .002*step_mult
+
+            for spread_mult in range(0,39):
+                spread = .01+spread_mult*.0025
+                (q_profit, b_profit) = start_tuner(step, spread, base, quote)
+                result = [step, spread, q_profit, b_profit]
+                results.append(result)
+                print("("+result[0]+","+result[1]+","+result[2]+","+result[3]+")")
+
+        print("Format: (step, spread, qprofit, bprofit)")
+        print("------------------------------------------------")
         for result in results:
-            print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
+            #print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
+            print("("+result[0]+","+result[1]+","+result[2]+","+result[3]+")")
         
 
     def handle_start_tuner(self):
