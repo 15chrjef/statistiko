@@ -47,7 +47,6 @@ class TestExchange(ExchangeBase):
             for line in infile:
                 obj = json.loads(line)
                 self.history.append(obj)
-                print(obj)
 
 
     def _sell(self, amount, ask,):

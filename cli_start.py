@@ -138,21 +138,22 @@ class Application(tk.Frame):
         base = 10
         quote = 636
         results = []
-        for step_mult in range(0,4):
-            step = 1.003 + .002*step_mult
+        print("test")
+        for step_mult in range(0,8):
+            step = 1.02 + .005*step_mult
 
-            for spread_mult in range(0,39):
-                spread = .01+spread_mult*.0025
+            for spread_mult in range(0,40):
+                spread = .06+spread_mult*.0025
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote)
-                result = [step, spread, q_profit, b_profit]
+                result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
-                print("("+result[0]+","+result[1]+","+result[2]+","+result[3]+")")
+                print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
 
         print("Format: (step, spread, qprofit, bprofit)")
         print("------------------------------------------------")
         for result in results:
             #print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
-            print("("+result[0]+","+result[1]+","+result[2]+","+result[3]+")")
+            print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
         
 
     def handle_start_tuner(self):
