@@ -142,7 +142,7 @@ class Application(tk.Frame):
         for step_mult in range(0,8):
             step = 1.02 + .005*step_mult
 
-            for spread_mult in range(0,40):
+            for spread_mult in range(0,19):
                 spread = .06+spread_mult*.0025
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote)
                 result = [str(step), str(spread), q_profit, b_profit]
