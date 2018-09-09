@@ -139,11 +139,11 @@ class Application(tk.Frame):
         quote = 636
         results = []
         print("test")
-        for step_mult in range(0,8):
-            step = 1.02 + .005*step_mult
+        for step_mult in range(0,32):
+            step = 1.01 + .00125*step_mult
 
-            for spread_mult in range(0,40):
-                spread = .06+spread_mult*.0025
+            for spread_mult in range(0,120):
+                spread = .05+spread_mult*.00125
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
