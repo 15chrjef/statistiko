@@ -21,13 +21,13 @@ getcontext().prec = 8
 class Merkato(object):
     def __init__(self, configuration, coin, base, spread,
                  bid_reserved_balance, ask_reserved_balance,
-                 user_interface=None, profit_margin=0, first_order='', starting_price=.018, quote_volume=0, base_volume=0, step=1.0033):
+                 user_interface=None, profit_margin=0, first_order='', starting_price=.018, quote_volume=0, base_volume=0, step=1.0033, distribution_strategy=1):
 
         # validate_merkato_initialization(configuration, coin, base, spread)
         self.initialized = False
         UUID = configuration[EXCHANGE] + "coin={}_base={}".format(coin,base)
         self.mutex_UUID = UUID
-        self.distribution_strategy = 1
+        self.distribution_strategy = distribution_strategy
         self.spread = Decimal(spread)
         self.profit_margin = Decimal(profit_margin)
         self.starting_price = starting_price
@@ -163,13 +163,13 @@ class Merkato(object):
                 self.quote_partials_balance -= filled_difference
 
 
-    def decaying_bid_ladder(self, total_amount, step, start_price):
+    def decaying_bid_ladder(self, total_amount, step, start_price, hyper=False):
         '''total_amount is denominated in the base asset (BTC)
         '''
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        total_orders = floor(math.log(2, step)) # 277 for a step of 1.0025
+        total_orders = floor(math.log(2, step)) if hyper == False else floor(math.log(2,step))/2# 277 for a step of 1.0025
         current_order = 0
         
         # Calculate scaling factor
@@ -179,13 +179,16 @@ class Merkato(object):
 
         current_order = 0
         amount = 0
-
         prior_reserve = self.bid_reserved_balance
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
             current_bid_price = Decimal(start_price/step_adjusted_factor)
-            current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))
-            current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price
+            if hyper == False:
+                current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))
+                current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price
+            else:
+                current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor)) * 2
+                current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price * 2
             amount += current_bid_amount
             
             # TODO Create lock
@@ -215,13 +218,16 @@ class Merkato(object):
         # will never be completely exhausted (run out).
         # total_to_distribute is in the base currency (usually BTC)
 
-        # 2. Call decaying_bid_ladder on that start price, with the given step,
-        #    and half the total_to_distribute
-        self.decaying_bid_ladder(Decimal(total_to_distribute/2), self.step, price)
-
-        # 3. Call decaying_bid_ladder again halving the
-        #    start_price, and halving the total_amount
-        self.decaying_bid_ladder(Decimal(total_to_distribute/4), self.step, price/2)
+        if self.distribution_strategy == 1:
+            log.info('Distribute Agressive Bids')
+            self.decaying_bid_ladder(Decimal(total_to_distribute), self.step, price)
+        elif self.distribution_strategy == 2:
+            log.info('Distribute Neutral Bids')
+            self.decaying_bid_ladder(Decimal(total_to_distribute/(4/3)), self.step, price)
+            self.decaying_bid_ladder(Decimal(total_to_distribute/4), self.step, price/2)
+        elif self.distribution_strategy == 3:
+            log.info('Distribute Hyper-Aggressive Asks')
+            self.decaying_bid_ladder(Decimal(total_to_distribute), self.step, price, True)
 
 
     def get_total_amount(self, init_amount, orderid):
@@ -232,7 +238,7 @@ class Merkato(object):
             return self.exchange.get_total_amount(orderid) # todo unimplemented on tux
 
 
-    def decaying_ask_ladder(self, total_amount, step, start_price):
+    def decaying_ask_ladder(self, total_amount, step, start_price, hyper=False):
         # Places an ask ladder from the start_price to 2x the start_price.
         # The last order in the ladder is half the amount of the first
         # order in the ladder. The amount allocated at each step decays as
@@ -240,7 +246,7 @@ class Merkato(object):
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        total_orders = floor(math.log(2, step)) # 277 for a step of 1.0025
+        total_orders = floor(math.log(2, step)) if hyper == False else floor(math.log(2, step))/2  # 277 for a step of 1.0025
         current_order = 0
 
         # Calculate scaling factor
@@ -254,7 +260,7 @@ class Merkato(object):
         prior_reserve = self.ask_reserved_balance
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
-            current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor)
+            current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor) if hyper == False else total_amount/(scaling_factor * step_adjusted_factor) * 2
             current_ask_price = start_price*step_adjusted_factor
             amount += current_ask_amount
 
@@ -275,14 +281,16 @@ class Merkato(object):
     def distribute_asks(self, price, total_to_distribute):
         # Allocates your market making balance on the ask side, in a way that
         # will never be completely exhausted (run out).
-
-        # 2. Call decaying_ask_ladder on that start price, with the given step,
-        #    and half the total_to_distribute
-        self.decaying_ask_ladder(Decimal(total_to_distribute/2), self.step, price)
-
-        # 3. Call decaying_ask_ladder once more, doubling the
-        #    start_price, and halving the total_amount
-        self.decaying_ask_ladder(Decimal(total_to_distribute/4), self.step, price * 2)
+        if self.distribution_strategy == 1:
+            log.info('Distribute Aggressive Asks')
+            self.decaying_ask_ladder(Decimal(total_to_distribute), self.step, price)
+        elif self.distribution_strategy == 2:
+            log.info('Distribute Neutral Asks')
+            self.decaying_ask_ladder(Decimal(total_to_distribute/(4/3)), self.step, price)
+            self.decaying_ask_ladder(Decimal(total_to_distribute/4), self.step, price * 2)
+        elif self.distribution_strategy == 3:
+            log.info('Distribute Hyper-Aggressive Asks')
+            self.decaying_ask_ladder(Decimal(total_to_distribute), self.step, price, True)
 
 
     def distribute_initial_orders(self, total_base, total_alt):

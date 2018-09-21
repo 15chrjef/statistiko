@@ -23,9 +23,17 @@ def get_tuner_params_base():
     base = float(input("base: "))
     return base
 
+def get_tuner_distribution_strategy():
+    print('Distribution Strategy?')
+    print('for Aggressive -> 1')
+    print('for neautral -> 2')
+    print('for hyper-aggressive -> 3')
+    strat = float(input('Selection: '))
+    return strat
 
-def start_tuner(step, spread, start_base, start_quote):
-    config = generate_tuner_config(step, spread, start_base, start_quote)
+
+def start_tuner(step, spread, start_base, start_quote, distribution_strategy):
+    config = generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy)
 
     tuner = Merkato(**config)
     done = False
@@ -42,7 +50,7 @@ def start_tuner(step, spread, start_base, start_quote):
             done = True
             return q_profit, b_profit
             
-def generate_tuner_config(step, spread, start_base, start_quote):
+def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy):
     config = {}
     inner_config = {"limit_only": True}
     
@@ -60,4 +68,6 @@ def generate_tuner_config(step, spread, start_base, start_quote):
     config['quote_volume'] = 0
     config['step'] = step
     config['base_volume'] = 0
+    config['distribution_strategy'] = distribution_strategy
+
     return config

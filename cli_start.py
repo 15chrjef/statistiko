@@ -2,7 +2,7 @@ from merkato.merkato_config import load_config, get_config, create_config
 from merkato.parser import parse
 from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_all_exchanges
 from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
-from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner
+from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner, get_tuner_distribution_strategy
 from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
@@ -137,14 +137,15 @@ class Application(tk.Frame):
     def handle_start_all_tuners(self):
         base = 10
         quote = 636
+        distribution_strategy = get_tuner_distribution_strategy()
         results = []
         print("test")
-        for step_mult in range(0,32):
-            step = 1.01 + .00125*step_mult
+        for step_mult in range(0,20):
+            step = 1.01 + .005*step_mult
 
-            for spread_mult in range(0,120):
-                spread = .05+spread_mult*.00125
-                (q_profit, b_profit) = start_tuner(step, spread, base, quote)
+            for spread_mult in range(0,30):
+                spread = .05+spread_mult*.005
+                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
                 print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
@@ -161,8 +162,9 @@ class Application(tk.Frame):
         spread = get_tuner_params_spread()
         base = get_tuner_params_base()
         quote = get_tuner_params_quote()
+        distribution_strategy = get_tuner_distribution_strategy()
         print("Params gotten")
-        start_tuner(step, spread, base, quote)
+        start_tuner(step, spread, base, quote, distribution_strategy)
 
 
     def start_statistikos(self):
@@ -183,12 +185,11 @@ class Application(tk.Frame):
                 now = str(datetime.datetime.now().isoformat()[:-7].replace("T", " "))
                 last_trade_price = instance.get_last_trade_price()
                 if last_trade_price == 'Error':
-                    f = open("price_data.txt", "a")
-                    f.write('Error'+ '\n')
+                    print('error on ' + instance.name)
                     continue
                 context = {"price": (now, last_trade_price)}
                 print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)
-                f = open("price_data.txt", "a")
+                f = open("{}price_data.txt".format(instance.name), "a")
                 f.write(json.dumps(context)+ '\n')
             time.sleep(60)
 
