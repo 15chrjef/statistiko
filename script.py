@@ -15,7 +15,8 @@ with open("output") as infile:
         data.append(obj)
 
 x, y, q, b = zip(*data)
-mult = tuple([0.01629*x for x in q])
+current_price = float(input('What is the current price?: '))
+mult = tuple([current_price*x for x in q])
 print(mult)
 z = tuple(map(sum, zip(mult, b)))
 z = list(map(float, z))

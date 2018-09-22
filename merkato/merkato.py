@@ -169,7 +169,7 @@ class Merkato(object):
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        scaling_log_factor = 2 if hyper == false else 1.5
+        scaling_log_factor = 2 if hyper == False else 1.5
         total_orders = floor(math.log(scaling_log_factor, step))
         current_order = 0
         
@@ -243,7 +243,7 @@ class Merkato(object):
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        scaling_log_factor = 2 if hyper == false else 1.5
+        scaling_log_factor = 2 if hyper == False else 1.5
         total_orders = floor(math.log(scaling_log_factor, step))  # 277 for a step of 1.0025
         current_order = 0
 
