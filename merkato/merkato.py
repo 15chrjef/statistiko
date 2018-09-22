@@ -169,7 +169,8 @@ class Merkato(object):
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        total_orders = floor(math.log(2, step)) if hyper == False else floor(math.log(2,step))/2# 277 for a step of 1.0025
+        scaling_log_factor = 2 if hyper == false else 1.5
+        total_orders = floor(math.log(scaling_log_factor, step))
         current_order = 0
         
         # Calculate scaling factor
@@ -183,12 +184,8 @@ class Merkato(object):
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
             current_bid_price = Decimal(start_price/step_adjusted_factor)
-            if hyper == False:
-                current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))
-                current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price
-            else:
-                current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor)) * 2
-                current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price * 2
+            current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))
+            current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price
             amount += current_bid_amount
             
             # TODO Create lock
@@ -226,7 +223,7 @@ class Merkato(object):
             self.decaying_bid_ladder(Decimal(total_to_distribute/(4/3)), self.step, price)
             self.decaying_bid_ladder(Decimal(total_to_distribute/4), self.step, price/2)
         elif self.distribution_strategy == 3:
-            log.info('Distribute Hyper-Aggressive Asks')
+            log.info('Distribute Hyper-Aggressive Bids')
             self.decaying_bid_ladder(Decimal(total_to_distribute), self.step, price, True)
 
 
@@ -246,7 +243,8 @@ class Merkato(object):
         # Abandon all hope, ye who enter here. This function uses black magic (math).
 
         scaling_factor = 0
-        total_orders = floor(math.log(2, step)) if hyper == False else floor(math.log(2, step))/2  # 277 for a step of 1.0025
+        scaling_log_factor = 2 if hyper == false else 1.5
+        total_orders = floor(math.log(scaling_log_factor, step))  # 277 for a step of 1.0025
         current_order = 0
 
         # Calculate scaling factor
@@ -260,7 +258,7 @@ class Merkato(object):
         prior_reserve = self.ask_reserved_balance
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
-            current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor) if hyper == False else total_amount/(scaling_factor * step_adjusted_factor) * 2
+            current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor)
             current_ask_price = start_price*step_adjusted_factor
             amount += current_ask_amount
 
