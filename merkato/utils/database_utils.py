@@ -157,6 +157,76 @@ def create_exchanges_table():
         conn.commit()
         conn.close()
 
+def create_price_data_table():
+    ''' TODO: Function Comment
+    '''
+    try:
+        conn = sqlite3.connect('merkato.db')
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute('''CREATE TABLE IF NOT EXISTS price_data
+                    (exchange text, pair text, date integer )''')
+        conn.commit()
+        conn.close()
+
+def insert_price_data(exchange, pair='XMRBTC', date=1):
+    ''' TODO: Function Comment
+    '''
+    try:
+        conn = sqlite3.connect('merkato.db')
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute("""REPLACE INTO price_data 
+                    (exchange, pair, date) VALUES (?,?,?)""", (exchange, pair, date))
+        conn.commit()
+        conn.close()
+
+def get_price_data_in_range(start, end):
+    ''' TODO: Function Comment
+    '''
+    try:
+        conn = sqlite3.connect('merkato.db')
+        conn.row_factory = sqlite3.dict_factory
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute("SELECT * FROM price_data WHERE date >= ? and date <= ?", (start, end))
+        price_data_results = c.fetchall()
+        conn.commit()
+        conn.close()
+
+        return price_data_results
+
+
+def no_price_data_table_exists():
+    ''' TODO: Function Comment
+    '''
+    try:
+        conn = sqlite3.connect('merkato.db')
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute('''SELECT count(*) FROM sqlite_master WHERE type="table" AND name="price_data"''')
+        number_of_mutex_tables = c.fetchall()[0][0]
+        conn.commit()
+        conn.close()
+
+        return number_of_mutex_tables == 0
+
 
 def insert_exchange(exchange, public_api_key='', private_api_key='', limit_only=True):
     ''' TODO: Function Comment

@@ -1,11 +1,12 @@
 from merkato.merkato_config import load_config, get_config, create_config
 from merkato.parser import parse
-from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_all_exchanges
+from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, insert_price_data, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_all_exchanges, no_price_data_table_exists, create_price_data_table
 from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
 from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner, get_tuner_distribution_strategy
 from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
+
 
 import getpass
 import sqlite3
@@ -182,15 +183,13 @@ class Application(tk.Frame):
             instances.append(exchange_instance)
         while True:
             for instance in instances:
-                now = str(datetime.datetime.now().isoformat()[:-7].replace("T", " "))
+                now = round(datetime.datetime.now().timestamp())
                 last_trade_price = instance.get_last_trade_price()
                 if last_trade_price == 'Error':
                     print('error on ' + instance.name)
                     continue
-                context = {"price": (now, last_trade_price)}
-                print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)
-                f = open("{}_{}_price_data.txt".format(instance.name, instance.ticker), "a")
-                f.write(json.dumps(context)+ '\n')
+                insert_price_data(instance.name, instance.ticker, now)
+                # print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)
             time.sleep(60)
 
     
@@ -198,6 +197,8 @@ class Application(tk.Frame):
     def add_statistiko(self):
         if no_merkatos_table_exists():
             create_merkatos_table()
+        if no_price_data_table_exists():
+            create_price_data_table()
         exchange_name = self.get_exchange_name()
         quote_asset = self.get_quote_asset()
         base_asset = self.get_base_asset()
