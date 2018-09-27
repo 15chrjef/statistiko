@@ -169,6 +169,8 @@ class Application(tk.Frame):
 
 
     def start_statistikos(self):
+        if no_price_data_table_exists():
+            create_price_data_table()
         merkatos = get_all_merkatos()
         instances = []
         for merkato in merkatos:
