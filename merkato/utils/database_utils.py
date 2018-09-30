@@ -169,11 +169,12 @@ def create_price_data_table():
     finally:
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS price_data
-                    (exchange text, pair text, date integer )''')
+                    (exchange text, pair text, date integer, price float )''')
+        c.execute('''CREATE UNIQUE INDEX id_epoch ON price_data (date)''')
         conn.commit()
         conn.close()
 
-def insert_price_data(exchange, pair='XMRBTC', date=1):
+def insert_price_data(exchange, price, pair='XMRBTC', date=1):
     ''' TODO: Function Comment
     '''
     try:
@@ -185,7 +186,7 @@ def insert_price_data(exchange, pair='XMRBTC', date=1):
     finally:
         c = conn.cursor()
         c.execute("""REPLACE INTO price_data 
-                    (exchange, pair, date) VALUES (?,?,?)""", (exchange, pair, date))
+                    (exchange, pair, date, price) VALUES (?,?,?,?)""", (exchange, pair, date, price))
         conn.commit()
         conn.close()
 

@@ -190,7 +190,7 @@ class Application(tk.Frame):
                 if last_trade_price == 'Error':
                     print('error on ' + instance.name)
                     continue
-                insert_price_data(instance.name, instance.ticker, now)
+                insert_price_data(instance.name, last_trade_price, instance.ticker, now)
                 # print('Price Data for {}_{}_{}'.format(instance.name, instance.coin, instance.base), context)
             time.sleep(60)
 
