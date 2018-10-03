@@ -145,13 +145,15 @@ class Application(tk.Frame):
         quote = 636
         distribution_strategy = get_tuner_distribution_strategy()
         results = []
+        print('What should be the start date for the tuner (EPOCH)')
+        start = input('selection: ')
         print("test")
         for step_mult in range(0,20):
             step = 1.01 + .005*step_mult
 
             for spread_mult in range(0,30):
                 spread = .05+spread_mult*.005
-                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy)
+                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
                 print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
