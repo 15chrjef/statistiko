@@ -69,9 +69,6 @@ def insert_config_into_exchanges(config):
     public_key = config["public_api_key"]
     private_key = config["private_api_key"]
     exchange = config["exchange"]
-
-    if no_exchanges_table_exists():
-        create_exchanges_table()
     insert_exchange(exchange, public_key, private_key, limit_only)
 
 
@@ -91,8 +88,16 @@ class Application(tk.Frame):
         self.spread = .02
         self.coin_reserve = 17
         self.base_reserve = .4
+        self.initialize_tables()
         self.create_widgets()
 
+    def initialize_tables(self):
+        if no_price_data_table_exists():
+            create_price_data_table()
+        if no_merkatos_table_exists():
+            create_merkatos_table()
+        if no_exchanges_table_exists():
+            create_exchanges_table()
 
     def create_widgets(self, message=None):
         if message == None:
@@ -169,8 +174,6 @@ class Application(tk.Frame):
 
 
     def start_statistikos(self):
-        if no_price_data_table_exists():
-            create_price_data_table()
         merkatos = get_all_merkatos()
         instances = []
         for merkato in merkatos:
@@ -197,10 +200,6 @@ class Application(tk.Frame):
     
 
     def add_statistiko(self):
-        if no_merkatos_table_exists():
-            create_merkatos_table()
-        if no_price_data_table_exists():
-            create_price_data_table()
         exchange_name = self.get_exchange_name()
         quote_asset = self.get_quote_asset()
         base_asset = self.get_base_asset()
@@ -241,8 +240,6 @@ class Application(tk.Frame):
         return self.get_base_asset()
 
     def add_exchange(self):
-        if no_exchanges_table_exists():
-            create_exchanges_table()
         self.exchange = self.get_exchange_name()
         self.run_enter_api_key_info()
 
