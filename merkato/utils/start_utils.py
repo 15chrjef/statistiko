@@ -42,14 +42,12 @@ def start_tuner(step, spread, start_base, start_quote, distribution_strategy, st
         stuff = tuner.update()
         if stuff == "stuffs":
             # Get bprofit and qprofit and ending balances
-            quote_volume = float(tuner.quote_volume)
-            base_volume = float(tuner.base_volume)
-            spread = tuner.spread
-            q_profit = quote_volume * (float(spread) - .002)
-            b_profit = base_volume * (float(spread) - .002)
-            print("------------ qprofit: {} bprofit: {}".format(q_profit, b_profit))
+            balances = tuner.exchange.get_balances()
+            abs_b_profit = balances['base']['amount']['balance'] - start_base
+            abs_q_profit = balances['coin']['amount']['balance'] - start_quote
+            print("------------ qprofit: {} bprofit: {}".format(abs_q_profit, abs_b_profit))
             done = True
-            return q_profit, b_profit
+            return abs_q_profit, abs_b_profit
             
 def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start):
     config = {}

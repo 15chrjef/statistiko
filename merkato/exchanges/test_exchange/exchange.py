@@ -184,9 +184,9 @@ class TestExchange(ExchangeBase):
 
 
     def get_balances(self):
-        pair_balances = {"base" : {"amount": {"balance":10000000000},
+        pair_balances = {"base" : {"amount": {"balance":self.orderbook.base},
                                    "name" : self.base},
-                         "coin": {"amount": {"balance":10000000000},
+                         "coin": {"amount": {"balance":self.orderbook.quote},
                                   "name": self.coin},
                         }
 

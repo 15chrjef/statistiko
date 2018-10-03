@@ -11,6 +11,8 @@ class Orderbook:
         self.bid_ticker = 'XMR'  # TODO: this needs to com from TestExchange
         self.ask_ticker = 'BTC'  # TODO: this needs to com from TestExchange
         self.current_order_id = 1
+        self.base = 10
+        self.quote = 636
 
     def addBid(self, userID, amount, price):
         #is_market_order = price > self.asks[0].price
@@ -52,16 +54,21 @@ class Orderbook:
 
         if market_type == ASK:
             while float(lowest_ask["price"]) < price:
+                old_ask = self.asks[0]
                 self.asks.pop(0)
                 self.add_resolved_order(lowest_ask, resolved_orders)
                 lowest_ask = self.asks[0]
+                self.base += old_ask['total'] * (1- old_ask['feepercent'])
+                self.quote -= old_ask['amount']
         else:
-            times = 0
             while float(highest_bid["price"]) > price:
+                old_bid = self.bids[0]
                 self.bids.pop(0)
                 self.add_resolved_order(highest_bid, resolved_orders)
                 highest_bid = self.bids[0]
-                times += 1
+                self.base -= old_bid['total'] 
+                self.quote += old_bid['amount'] * (1- old_bid['feepercent'])
+
         return resolved_orders
 
     def generate_fake_orders(self, price):
@@ -98,7 +105,7 @@ class Orderbook:
     def create_order(self, user_id, amount, price, order_type):
         new_order =  {
             'fee': '0.00000000', 
-            'feepercent': '0.000',
+            'feepercent': .001,
             "user_id": user_id,
             "price":price,
             'coin': self.bid_ticker,
@@ -109,7 +116,7 @@ class Orderbook:
             'type': order_type
         }   
 
-        new_order['amount'] = amount
+        new_order['amount'] = float(amount)
         new_order['initamount'] = amount
 
         new_order['total'] = float(price) * float(amount)
