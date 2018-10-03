@@ -21,7 +21,7 @@ getcontext().prec = 8
 class Merkato(object):
     def __init__(self, configuration, coin, base, spread,
                  bid_reserved_balance, ask_reserved_balance,
-                 user_interface=None, profit_margin=0, first_order='', starting_price=.018, quote_volume=0, base_volume=0, step=1.0033, distribution_strategy=1):
+                 user_interface=None, profit_margin=0, first_order='', starting_price=.018, quote_volume=0, base_volume=0, step=1.0033, distribution_strategy=1, start=0):
 
         # validate_merkato_initialization(configuration, coin, base, spread)
         self.initialized = False

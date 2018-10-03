@@ -7,9 +7,11 @@ import operator
 bad_chars = '()'
 data = []
 candidate_list = []
+# range = all right now
 current_price = float(input('What is the last price in the data set?: '))
+filename = input('What file would you like to render?')
 
-with open("output") as infile:
+with open(filename) as infile:
     for line in infile:
         for c in bad_chars: 
             line = line.replace(c, "")

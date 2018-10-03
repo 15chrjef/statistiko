@@ -210,6 +210,26 @@ def get_price_data_in_range(start, end):
         return price_data_results
 
 
+def get_price_data_from_start(start, exchange="bina", pair="XMRBTC"):
+    ''' TODO: Function Comment
+    '''
+    try:
+        conn = sqlite3.connect('merkato.db')
+        conn.row_factory = sqlite3.dict_factory
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute("SELECT * FROM price_data WHERE date >= ? AND exchange = ? AND pair = ?", (start, exchange, pair))
+        price_data_results = c.fetchall()
+        conn.commit()
+        conn.close()
+
+        return price_data_results
+
+
 def no_price_data_table_exists():
     ''' TODO: Function Comment
     '''

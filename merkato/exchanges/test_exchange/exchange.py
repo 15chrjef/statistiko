@@ -13,6 +13,7 @@ from merkato.constants import BUY, SELL, PRICE, USER_ID, AMOUNT
 from merkato.exchanges.test_exchange.orderbook import Orderbook
 from merkato.exchanges.test_exchange.constants import test_asks, test_bids
 from merkato.exchanges.tux_exchange.utils import translate_ticker
+from merkato.utils.database_utils import get_price_data_from_start
 
 class TestExchange(ExchangeBase):
     def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password', limit_only=True):
@@ -31,7 +32,8 @@ class TestExchange(ExchangeBase):
         self.DEBUG = 3
         self.history = []
         self.index = 0
-        self.load_history()
+        print(config)
+        self.load_history(config['start'])
         
     def debug(self, level, header, *args):
         if level <= self.DEBUG:
@@ -42,11 +44,15 @@ class TestExchange(ExchangeBase):
             print("-" * 10)
 
 
-    def load_history(self):
-        with open("price_data.txt") as infile:
-            for line in infile:
-                obj = json.loads(line)
-                self.history.append(obj)
+    def load_history(self, start):
+        ###here###
+        output_set = get_price_data_from_start(start)
+        for data in output_set:
+            obj = {}
+            (_,_,timestamp,price) = data
+            obj["price"] = [timestamp, price] # Timestamp is vestigial and can be removed later
+            self.history.append(obj)
+            print(obj)
 
 
     def _sell(self, amount, ask,):

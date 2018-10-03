@@ -26,14 +26,14 @@ def get_tuner_params_base():
 def get_tuner_distribution_strategy():
     print('Distribution Strategy?')
     print('for Aggressive -> 1')
-    print('for neautral -> 2')
+    print('for neutral -> 2')
     print('for hyper-aggressive -> 3')
     strat = float(input('Selection: '))
     return strat
 
 
-def start_tuner(step, spread, start_base, start_quote, distribution_strategy):
-    config = generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy)
+def start_tuner(step, spread, start_base, start_quote, distribution_strategy, start=0):
+    config = generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start)
 
     tuner = Merkato(**config)
     done = False
@@ -50,13 +50,14 @@ def start_tuner(step, spread, start_base, start_quote, distribution_strategy):
             done = True
             return q_profit, b_profit
             
-def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy):
+def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start):
     config = {}
     inner_config = {"limit_only": True}
     
     inner_config['exchange'] = 'test'
     inner_config['public_api_key'] = 1
     inner_config['private_api_key'] = 1
+    inner_config['start'] = start
 
     config['configuration'] = inner_config
     config['base'] = 'BTC'

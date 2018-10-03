@@ -19,3 +19,9 @@ output.log
 price_data.txt
 .vscode
 testmy_merkato_tax_audit_logs.csv
+merkato.db-journal
+output.test
+price_data_first_3_months.txt
+merkato - Copy.db
+data2
+latest_three_months.test
