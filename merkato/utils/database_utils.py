@@ -221,7 +221,7 @@ def get_price_data_from_start(start, exchange="bina", pair="XMRBTC"):
 
     finally:
         c = conn.cursor()
-        c.execute("SELECT * FROM price_data WHERE date >= ? AND exchange = ? AND pair = ?", (start, exchange, pair))
+        c.execute("SELECT * FROM price_data WHERE date >= ? AND exchange = ? AND pair = ? ORDER BY date ASC", (start, exchange, pair))
         price_data_results = c.fetchall()
         conn.commit()
         conn.close()
