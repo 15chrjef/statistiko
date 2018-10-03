@@ -178,8 +178,8 @@ class Application(tk.Frame):
             if merkato['exchange'] == 'test':
                 continue
             exchange = get_exchange(merkato['exchange'])
-            password = getpass.getpass('Enter password for {}\n'.format(merkato['exchange']))
-            decrypt_keys(exchange, password)
+            exchange["public_api_key"]  = ''
+            exchange["private_api_key"] = ''
             exchange_class = get_relevant_exchange(merkato['exchange'])
             exchange_instance = exchange_class(exchange, coin=merkato['alt'], base=merkato['base'])
             instances.append(exchange_instance)
@@ -249,8 +249,8 @@ class Application(tk.Frame):
     def run_enter_api_key_info(self, message=""):
         if message != "":
             print(message)
-        pub_key = getpass.getpass('Enter Public Key:')
-        priv_key = getpass.getpass('Enter Private Key:')
+        pub_key = ''
+        priv_key = ''
         self.submit_api_keys(pub_key, priv_key)
 
 
@@ -264,26 +264,18 @@ class Application(tk.Frame):
         config['exchange'] = self.exchange
         self.config = config
 
-        if self.exchange == 'tux':
-            credentials_are_valid = validate_credentials(config)
-
-        elif self.exchange == 'bina':
-            credentials_are_valid = validate_keys(config)
-
-        elif self.exchange == 'krak':
-            credentials_are_valid = validate_kraken(config)
-
+        if self.exchange == 'tux' or self.exchange == 'bina' or self.exchange == 'krak':
+            valid_exchange = True
         else:
-            "Exchange not supported, this should never happen"
-            credentials_are_valid = False
+            print("Exchange not supported, this should never happen")
+            valid_exchange = False
 
-        if not credentials_are_valid:
-            print("API Keys Invalid")
-            self.run_enter_api_key_info("API keys invalid, please try again.")
+        if not valid_exchange:
+            print("Wrong exchange try again")
             return
 
         else:
-            print("API keys valid")
+            print("Valid Exchange")
             # Call a new pane here, asking  for a password.
             self.submit_password(self.exchange)
             return
@@ -307,12 +299,8 @@ class Application(tk.Frame):
 
 
     def submit_password(self, exchange):
-        print('Enter password for {}\n\n'.format(exchange))
-        password = getpass.getpass('Selection: ') 
         config = self.config
-        encrypt_keys(config, password)
         insert_config_into_exchanges(config)
-        decrypt_keys(config, password)
         self.create_widgets(exchange_added_text)
 
 
