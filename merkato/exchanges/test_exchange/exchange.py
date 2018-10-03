@@ -49,11 +49,9 @@ class TestExchange(ExchangeBase):
         output_set = get_price_data_from_start(start)
         for data in output_set:
             obj = {}
-            print(data)
             (_,_,timestamp,price) = data
             obj["price"] = [timestamp, price] # Timestamp is vestigial and can be removed later
             self.history.append(obj)
-            print(obj)
 
 
     def _sell(self, amount, ask,):

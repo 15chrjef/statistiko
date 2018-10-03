@@ -74,7 +74,6 @@ class Orderbook:
         except: 
             is_ask_market_order = False
 
-
         if(is_ask_market_order):
             return self.resolve_market_order(ASK, price)
         elif(is_bid_market_order):

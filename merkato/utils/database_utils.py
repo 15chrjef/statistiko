@@ -229,6 +229,23 @@ def get_price_data_from_start(start, exchange="bina", pair="XMRBTC"):
 
         return price_data_results
 
+def get_first_price_after_time(time):
+    try:
+        conn = sqlite3.connect('merkato.db')
+        conn.row_factory = sqlite3.dict_factory
+
+    except Exception as e:
+        print(str(e))
+
+    finally:
+        c = conn.cursor()
+        c.execute("SELECT *, MIN(date) FROM price_data WHERE date >= ?", (time,))
+        price_data_results = c.fetchall()
+        conn.commit()
+        conn.close()
+
+    return price_data_results
+
 
 def no_price_data_table_exists():
     ''' TODO: Function Comment

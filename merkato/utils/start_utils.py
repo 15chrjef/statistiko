@@ -1,4 +1,5 @@
 from merkato.merkato import Merkato
+from merkato.utils.database_utils import get_first_price_after_time
 
 def get_tuner_params_step():
     print('MUST BE A NUMBER')
@@ -63,7 +64,7 @@ def generate_tuner_config(step, spread, start_base, start_quote, distribution_st
     config['base'] = 'BTC'
     config['coin'] = 'XMR'
     config['spread'] = spread
-    config['starting_price'] = 0.0157
+    config['starting_price'] = get_first_price_after_time(start)[0][3]
     config['ask_reserved_balance'] = start_quote
     config['bid_reserved_balance'] = start_base
     config['quote_volume'] = 0
