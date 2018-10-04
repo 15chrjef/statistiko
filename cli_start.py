@@ -160,9 +160,10 @@ class Application(tk.Frame):
 
         print("Format: (step, spread, qprofit, bprofit)")
         print("------------------------------------------------")
-        for result in results:
-            #print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
-            print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
+        with open("outfile_test", "a") as outfile:
+            for result in results:
+                outfile.write("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
+                print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
         
 
     def handle_start_tuner(self):
