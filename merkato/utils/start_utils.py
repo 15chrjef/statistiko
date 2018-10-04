@@ -45,6 +45,7 @@ def start_tuner(step, spread, start_base, start_quote, distribution_strategy, st
             balances = tuner.exchange.get_balances()
             abs_b_profit = balances['base']['amount']['balance'] - start_base
             abs_q_profit = balances['coin']['amount']['balance'] - start_quote
+            print('volumes', tuner.base_volume, tuner.quote_volume)
             print("------------ qprofit: {} bprofit: {}".format(abs_q_profit, abs_b_profit))
             done = True
             return abs_q_profit, abs_b_profit

@@ -1,3 +1,5 @@
+from merkato.exchanges.test_exchange.constants import test_asks, test_bids
+
 DEBUG = True
 
 def apply_resolved_orders(current_accounts, resolved_orders):
@@ -19,3 +21,11 @@ def apply_resolved_orders(current_accounts, resolved_orders):
                 user[ticker] = resolved_orders[user_id][ticker]
             else:
                 user[ticker] += resolved_orders[user_id][ticker]
+
+def get_initial_orderbook(start):
+    config = {}
+    test_asks[0]['price'] = float(start) + .0001
+    test_bids[0]['price'] = float(start) - .0001
+    config['asks'] = test_asks
+    config['bids'] = test_bids
+    return config

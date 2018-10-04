@@ -7,7 +7,7 @@ import time
 import random
 import urllib.parse
 from decimal import *
-from merkato.exchanges.test_exchange.utils import apply_resolved_orders
+from merkato.exchanges.test_exchange.utils import apply_resolved_orders, get_initial_orderbook
 from merkato.exchanges.exchange_base import ExchangeBase
 from merkato.constants import BUY, SELL, PRICE, USER_ID, AMOUNT
 from merkato.exchanges.test_exchange.orderbook import Orderbook
@@ -16,12 +16,13 @@ from merkato.exchanges.tux_exchange.utils import translate_ticker
 from merkato.utils.database_utils import get_price_data_from_start
 
 class TestExchange(ExchangeBase):
-    def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password', limit_only=True):
+    def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password', limit_only=True, starting_price=0):
         self.coin = coin
         self.base = base
         self.name = "test"
         self.ticker = translate_ticker(coin=coin, base=base)
-        self.orderbook = Orderbook()
+        initial_orderbook = get_initial_orderbook(starting_price)
+        self.orderbook = Orderbook(**initial_orderbook)
         self.user_id = user_id
         self.USER_ID = user_id
         self.user_accounts = accounts if accounts else {}
@@ -32,6 +33,7 @@ class TestExchange(ExchangeBase):
         self.DEBUG = 3
         self.history = []
         self.index = 0
+        self.start = starting_price
         print(config)
         self.load_history(config['start'])
         
@@ -47,6 +49,8 @@ class TestExchange(ExchangeBase):
     def load_history(self, start):
         ###here###
         output_set = get_price_data_from_start(start)
+        print('first', output_set[0])
+        print('last', output_set[len(output_set) - 1])
         for data in output_set:
             obj = {}
             (_,_,timestamp,price) = data
@@ -223,14 +227,8 @@ class TestExchange(ExchangeBase):
 
 
     def get_lowest_ask(self):
-        asks_exist = len(self.orderbook.asks) > 0
-        if not asks_exist:
-            return test_asks[0][PRICE]
         return self.orderbook.asks[0][PRICE]
 
 
     def get_highest_bid(self):
-        bids_exist = len(self.orderbook.bids) > 0
-        if not bids_exist:
-            return test_bids[0][PRICE]
         return self.orderbook.bids[0][PRICE]

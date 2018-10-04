@@ -1,7 +1,7 @@
 test_bids = [
         {
             'fee': '0.00000000', 
-            'feepercent': '0.000',
+            'feepercent': 0.001,
             "user_id": 3,
             "price": .015,
             'coin': 'ETH',
@@ -18,7 +18,7 @@ test_bids = [
 test_asks = [
         {
             'fee': '0.00000000', 
-            'feepercent': '0.000',
+            'feepercent': 0.001,
             "user_id": 7,
             "price": .0164,
             'coin': 'ETH',

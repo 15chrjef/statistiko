@@ -30,7 +30,7 @@ class Merkato(object):
         self.distribution_strategy = distribution_strategy
         self.spread = Decimal(spread)
         self.profit_margin = Decimal(profit_margin)
-        self.starting_price = starting_price
+        self.starting_price = Decimal(starting_price)
         self.quote_volume = Decimal(quote_volume)
         self.base_volume = Decimal(base_volume)
         self.step = step
@@ -50,7 +50,7 @@ class Merkato(object):
         self.user_interface = user_interface
 
         exchange_class = get_relevant_exchange(configuration[EXCHANGE])
-        self.exchange = exchange_class(configuration, coin=coin, base=base)
+        self.exchange = exchange_class(configuration, coin=coin, base=base, starting_price=starting_price)
 
         log.info("Creating New Merkato")
 
@@ -190,7 +190,7 @@ class Merkato(object):
             
             # TODO Create lock
             response = self.exchange.buy(current_bid_amount, current_bid_price)
-
+            print('merkato bid', current_bid_amount, current_bid_price)
             self.remove_reserve(current_bid_total, BID_RESERVE) 
             # TODO Release lock
             
@@ -294,7 +294,7 @@ class Merkato(object):
     def distribute_initial_orders(self, total_base, total_alt):
         ''' TODO: Function comment
         '''
-        current_price = (Decimal(self.exchange.get_highest_bid()) + Decimal(self.exchange.get_lowest_ask()))/2
+        current_price = self.starting_price
         if self.user_interface:
             current_price = Decimal(self.user_interface.confirm_price(current_price))
         # update_merkato(self.mutex_UUID, STARTING_PRICE, float(current_price))

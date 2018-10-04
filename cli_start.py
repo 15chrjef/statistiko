@@ -141,8 +141,8 @@ class Application(tk.Frame):
         create_exchanges_table()
 
     def handle_start_all_tuners(self):
-        base = 10
-        quote = 636
+        base = 16.1
+        quote = 1064.21
         distribution_strategy = get_tuner_distribution_strategy()
         results = []
         print('What should be the start date for the tuner (EPOCH)')
