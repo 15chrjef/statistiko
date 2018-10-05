@@ -26,12 +26,11 @@ class TestExchange(ExchangeBase):
         self.user_id = user_id
         self.USER_ID = user_id
         self.user_accounts = accounts if accounts else {}
-        self.order_history = []
+        self.transaction_history = []
         self.price = price
-        self.retries = 3
         self.limit_only = True
         self.DEBUG = 3
-        self.history = []
+        self.simulation_data = []
         self.index = 0
         self.start = starting_price
         print(config)
@@ -47,7 +46,6 @@ class TestExchange(ExchangeBase):
 
 
     def load_history(self, start):
-        ###here###
         output_set = get_price_data_from_start(start)
         print('first', output_set[0])
         print('last', output_set[len(output_set) - 1])
@@ -55,7 +53,7 @@ class TestExchange(ExchangeBase):
             obj = {}
             (_,_,timestamp,price) = data
             obj["price"] = [timestamp, price] # Timestamp is vestigial and can be removed later
-            self.history.append(obj)
+            self.simulation_data.append(obj)
 
 
     def _sell(self, amount, ask,):
@@ -98,19 +96,20 @@ class TestExchange(ExchangeBase):
             return False
 
 
-    def get_order_history(self, user_id):
-        return self.order_history
+    def get_transaction_history(self, user_id):
+        return self.transaction_history
 
 
     def generate_fake_data(self, delta_range=[-3,3]):
         #positive_or_negative = [-.2, .2]
         # self.debug(3,"test exchange.py gen fake data", self.price)
         #self.price = abs(self.price * (1 + random.randint(*delta_range) / 100))  # percent walk of price, never < 0
-        self.price = float(self.history[self.index]['price'][1])
+        self.price = float(self.simulation_data[self.index]['price'][1])
         # self.debug(3, "test exchange.py gen fake data: new price", self.price)
         new_orders = self.orderbook.generate_fake_orders(self.price)        
         if new_orders:
-            self.order_history.extend(new_orders)
+            print('sim line', self.simulation_data[self.index])
+            self.transaction_history.extend(new_orders)
         self.index = self.index + 1
 
 
@@ -151,13 +150,13 @@ class TestExchange(ExchangeBase):
 
     def get_my_trade_history(self):
         try:
-            if not self.order_history:
+            if not self.transaction_history:
                 return []
-            filtered_history = list(filter(lambda order: order[USER_ID] == self.USER_ID, self.order_history))
+            filtered_history = list(filter(lambda order: order[USER_ID] == self.USER_ID, self.transaction_history))
         except ValueError:
             filtered_history = []
         except:
-            self.debug(3, "get_my_trade_history", self.order_history, self.user_id)
+            self.debug(3, "get_my_trade_history", self.transaction_history, self.user_id)
             raise
 
         # print("Last 5 in Filtered History:", filtered_history[-5:])
@@ -220,7 +219,7 @@ class TestExchange(ExchangeBase):
 
 
     def get_last_trade_price(self):
-        if self.index < len(self.history):
+        if self.index < len(self.simulation_data):
             self.generate_fake_data()
             return self.price
         return "EOF"

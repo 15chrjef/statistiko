@@ -115,6 +115,7 @@ class Merkato(object):
                 coin_amt = base_amt/buy_price
                 # This is the actual number we want to apply, not the original executed amount.
                 amount = coin_amt
+                log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
 
                 market = self.exchange.buy(amount, buy_price)
 
@@ -129,6 +130,7 @@ class Merkato(object):
 
             if tx[TYPE] == BUY:
                 sell_price = Decimal(price) * ( 1  + self.spread)
+                log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
 
                 market = self.exchange.sell(amount, sell_price)
                 
@@ -270,6 +272,7 @@ class Merkato(object):
 
             # TODO Create lock
             response = self.exchange.sell(current_ask_amount, current_ask_price)
+            print('distribute ask amount:{} price:{}'.format(current_ask_amount, current_ask_price))
 
             # log.info('ask response {}'.format(response))
 
@@ -424,24 +427,6 @@ class Merkato(object):
             # log.debug("New transactions: {} \n".format(new_history))
 
             new_transactions = self.rebalance_orders(new_history)
-            #self.merge_orders()
-            # todo: Talk about whether merging 'close enough' orders is reasonable. 
-            
-        # context to be used for GUI plotting
-        context = {"price": (now, last_trade_price),
-                   "filled_orders": new_transactions,
-                   "open_orders": self.exchange.get_my_open_orders(context_formatted=True),
-                   "balances": self.exchange.get_balances(),
-                   "orderbook": self.exchange.get_all_orders(),
-                   "starting_price": self.starting_price,
-                   "starting_base": self.bid_reserved_balance * 4,
-                   "starting_quote": self.ask_reserved_balance * 4,
-                   "spread": self.spread,
-                   "step": self.step
-                   }
-        
-        return context
-
 
     def modify_settings(self, settings):
         # replace old settings with new settings

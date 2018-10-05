@@ -10,7 +10,7 @@ test_bids = [
             'orderid': 3, 
             'market': 'BTC',
             'type': 'sell',
-            'amount': .001,
+            'amount': .0005,
             'total': 0.000015
         }
     ]
@@ -27,7 +27,7 @@ test_asks = [
             'orderid': 7, 
             'market': 'BTC',
             'type': 'buy',
-            'amount': .001,
+            'amount': .0005,
             'total': 0.0000164
         }
     ]

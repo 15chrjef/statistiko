@@ -1,4 +1,5 @@
 from merkato.exchanges.test_exchange.constants import test_asks, test_bids
+import copy
 
 DEBUG = True
 
@@ -24,8 +25,11 @@ def apply_resolved_orders(current_accounts, resolved_orders):
 
 def get_initial_orderbook(start):
     config = {}
-    test_asks[0]['price'] = float(start) + .0001
-    test_bids[0]['price'] = float(start) - .0001
-    config['asks'] = test_asks
-    config['bids'] = test_bids
+    new_bids = copy.deepcopy(test_bids)
+    new_asks = copy.deepcopy(test_asks)
+    new_asks[0]['price'] = float(start) + .1
+    new_bids[0]['price'] = float(start) - .01
+    config['asks'] = new_asks
+    config['bids'] = new_bids
+    print('config', config)
     return config

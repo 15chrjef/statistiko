@@ -147,12 +147,11 @@ class Application(tk.Frame):
         results = []
         print('What should be the start date for the tuner (EPOCH)')
         start = input('selection: ')
-        print("test")
-        for step_mult in range(0,20):
-            step = 1.01 + .005*step_mult
+        for step_mult in range(0,1):
+            step = 1.05 + .005*step_mult
 
-            for spread_mult in range(0,30):
-                spread = .05+spread_mult*.005
+            for spread_mult in range(0,1):
+                spread = .12+spread_mult*.005
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
@@ -171,8 +170,9 @@ class Application(tk.Frame):
         base = get_tuner_params_base()
         quote = get_tuner_params_quote()
         distribution_strategy = get_tuner_distribution_strategy()
-        print("Params gotten")
-        start_tuner(step, spread, base, quote, distribution_strategy)
+        print('What should be the start date for the tuner (EPOCH)')
+        start = input('selection: ')
+        start_tuner(step, spread, base, quote, distribution_strategy, start)
 
 
     def start_statistikos(self):

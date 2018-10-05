@@ -16,7 +16,7 @@ class Orderbook:
 
     def addBid(self, userID, amount, price):
         #is_market_order = price > self.asks[0].price
-        print('orerbook bid', amount, price )
+        # print('orerbook bid', amount, price )
         order = self.create_order(userID, amount, price, BUY)
         self.bids.append(order)
         self.bids = sorted(self.bids, key=lambda bid: bid["price"], reverse=True)
@@ -74,15 +74,11 @@ class Orderbook:
         return resolved_orders
 
     def generate_fake_orders(self, price):
-        try:
-            is_bid_market_order = price < self.bids[0]["price"]
-        except:
-            is_bid_market_order = False
-        try:
-            is_ask_market_order = price > self.asks[0]["price"]
-        except: 
-            is_ask_market_order = False
+        
+        is_bid_market_order = price < self.bids[0]["price"]
+        is_ask_market_order = price > self.asks[0]["price"]
 
+        ###
         if(is_ask_market_order):
             return self.resolve_market_order(ASK, price)
         elif(is_bid_market_order):
