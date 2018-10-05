@@ -148,11 +148,11 @@ class Application(tk.Frame):
         print('What should be the start date for the tuner (EPOCH)')
         start = input('selection: ')
         print("test")
-        for step_mult in range(0,20):
-            step = 1.01 + .005*step_mult
+        for step_mult in range(0,5):
+            step = 1.05 + .005*step_mult
 
-            for spread_mult in range(0,30):
-                spread = .05+spread_mult*.005
+            for spread_mult in range(0,6):
+                spread = .1+spread_mult*.005
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
