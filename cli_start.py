@@ -16,6 +16,13 @@ import datetime
 import tkinter as tk
 import json
 
+from mpl_toolkits.mplot3d import Axes3D
+from scipy.interpolate import griddata
+import matplotlib.pyplot as plt
+import numpy as np
+import operator
+
+
 # Yes, I know we need to abstract these out later. This is me hacking.
 def encrypt_keys(config, password=None):
     ''' Encrypts the API keys before storing the config in the database
@@ -70,6 +77,48 @@ def insert_config_into_exchanges(config):
     private_key = config["private_api_key"]
     exchange = config["exchange"]
     insert_exchange(exchange, public_key, private_key, limit_only)
+
+
+def graph_results(results):
+
+    bad_chars = '()'
+    data = []
+    candidate_list = []
+    # range = all right now
+    current_price = float(input('What is the last price in the data set?: '))
+
+    for result in results:
+        var = "("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")"
+        for c in bad_chars: 
+            var = var.replace(c, "")
+
+        obj = tuple(map(float, var.split(',')))
+        data.append(obj)
+
+        (x,y,q,b) = tuple(map(float, var.split(',')))
+        candidate = (x,y,q*current_price+b)
+        candidate_list.append(candidate)
+
+
+    candidate_list.sort(key=lambda x: x[2])
+    top_ten = list(reversed(candidate_list[-10:]))
+
+    print("Top ten:")
+    for element in top_ten:
+        print(element)
+
+    x, y, q, b = zip(*data)
+
+    mult = tuple([current_price*x for x in q])
+    #print(mult)
+    z = tuple(map(sum, zip(mult, b)))
+    z = list(map(float, z))
+    grid_x, grid_y = np.mgrid[min(x):max(x):100j, min(y):max(y):100j]
+    grid_z = griddata((x, y), z, (grid_x, grid_y), method='cubic')
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot_surface(grid_x, grid_y, grid_z, cmap=plt.cm.Spectral)
+    plt.show()
 
 
 welcome_txt = """Welcome to Statistiko Would you like to run current statistiko, or add a new exchange?."""
@@ -163,7 +212,9 @@ class Application(tk.Frame):
         for result in results:
             #print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
             print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
-        
+
+        graph_results(results)
+
 
     def handle_start_tuner(self):
         step = get_tuner_params_step()
