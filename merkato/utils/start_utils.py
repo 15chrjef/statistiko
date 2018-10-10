@@ -66,7 +66,11 @@ def generate_tuner_config(step, spread, start_base, start_quote, distribution_st
     config['base'] = 'BTC'
     config['coin'] = 'XMR'
     config['spread'] = spread
-    config['starting_price'] = get_first_price_after_time(start)[0][3]
+    starting_price = get_first_price_after_time(start)[0][3]
+    print('The starting price is: {}'.format(starting_price))
+    print('Submit the price below for confirmation, OR input a different price to be used')
+    confirmed_start_price = input('Selection: ')
+    config['starting_price'] = confirmed_start_price
     config['ask_reserved_balance'] = start_quote
     config['bid_reserved_balance'] = start_base
     config['quote_volume'] = 0
