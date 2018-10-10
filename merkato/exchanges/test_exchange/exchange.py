@@ -21,7 +21,7 @@ class TestExchange(ExchangeBase):
         self.base = base
         self.name = "test"
         self.ticker = translate_ticker(coin=coin, base=base)
-        initial_orderbook = get_initial_orderbook(starting_price)
+        initial_orderbook = get_initial_orderbook(starting_price, config)
         self.orderbook = Orderbook(**initial_orderbook)
         self.user_id = user_id
         self.USER_ID = user_id

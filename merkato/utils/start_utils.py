@@ -45,6 +45,7 @@ def start_tuner(step, spread, start_base, start_quote, distribution_strategy, st
             balances = tuner.exchange.get_balances()
             abs_b_profit = balances['base']['amount']['balance'] - start_base
             abs_q_profit = balances['coin']['amount']['balance'] - start_quote
+            
             print('volumes', tuner.base_volume, tuner.quote_volume)
             print("------------ qprofit: {} bprofit: {}".format(abs_q_profit, abs_b_profit))
             done = True
@@ -58,6 +59,8 @@ def generate_tuner_config(step, spread, start_base, start_quote, distribution_st
     inner_config['public_api_key'] = 1
     inner_config['private_api_key'] = 1
     inner_config['start'] = start
+    inner_config['start_quote'] = start_quote
+    inner_config['start_base'] = start_base
 
     config['configuration'] = inner_config
     config['base'] = 'BTC'

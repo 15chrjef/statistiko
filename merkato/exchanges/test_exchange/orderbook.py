@@ -4,15 +4,15 @@ from merkato.exchanges.test_exchange.constants import BID, ASK
 from merkato.constants import BUY, SELL
 
 class Orderbook:
-    def __init__(self, bids=None, asks=None):
+    def __init__(self, bids=None, asks=None, start_base=0, start_quote=0):
         self.bids = bids if bids else []
         self.asks = asks if asks else []
         self.resolved = []
         self.bid_ticker = 'XMR'  # TODO: this needs to com from TestExchange
         self.ask_ticker = 'BTC'  # TODO: this needs to com from TestExchange
         self.current_order_id = 1
-        self.base = 16.1
-        self.quote = 1064.21
+        self.base = start_base
+        self.quote = start_quote
 
     def addBid(self, userID, amount, price):
         #is_market_order = price > self.asks[0].price
