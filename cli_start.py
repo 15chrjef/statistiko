@@ -3,7 +3,6 @@ from merkato.parser import parse
 from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, insert_price_data, drop_merkatos_table, drop_exchanges_table, insert_exchange, get_all_exchanges, no_price_data_table_exists, create_price_data_table
 from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
 from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner, get_tuner_distribution_strategy
-from merkato.exchanges.tux_exchange.utils import validate_credentials
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
 
@@ -265,9 +264,8 @@ class Application(tk.Frame):
         print('Select Exchange')
         print('For Binance -> bina')
         print('For Kraken -> krak')
-        print('For Tux -> tux')
         selection = input('Selection: ')
-        if selection in ['bina', 'krak', 'tux']:
+        if selection in ['bina', 'krak']:
             return selection
         return self.get_exchange_name()
 
@@ -315,7 +313,7 @@ class Application(tk.Frame):
         config['exchange'] = self.exchange
         self.config = config
 
-        if self.exchange == 'tux' or self.exchange == 'bina' or self.exchange == 'krak':
+        if self.exchange == 'bina' or self.exchange == 'krak':
             valid_exchange = True
         else:
             print("Exchange not supported, this should never happen")

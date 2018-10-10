@@ -1,4 +1,3 @@
-tuxURL  = "https://tuxexchange.com/api"
 poloURL = "https://poloniex.com/public"
 BUY = 'buy'
 SELL = 'sell'
@@ -7,13 +6,12 @@ PRICE = 'price'
 USER_ID = 'user_id'
 AMOUNT = 'amount'
 known_exchanges = {
-    'tux': 'tux',
     'polo': 'polo',
     'bit': 'bit',
     'test': 'test',
     'bina': 'bina'
 }
-implemented_exchanges = ["tux", "test"]
+implemented_exchanges = ["test"]
 LAST_ORDER = 'last_order'
 FIRST_ORDER = 'first_order'
 

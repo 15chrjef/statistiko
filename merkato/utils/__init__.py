@@ -1,6 +1,5 @@
 import logging
 from merkato.exchanges.test_exchange.exchange import TestExchange
-from merkato.exchanges.tux_exchange.exchange import TuxExchange
 from merkato.exchanges.binance_exchange.exchange import BinanceExchange
 from merkato.exchanges.kraken_exchange.exchange import KrakenExchange
 from merkato.constants import known_exchanges
@@ -55,7 +54,6 @@ def update_config_with_credentials(config):
 
 def get_exchange():
     print("What exchange is this config file for?")
-    print("1. for TuxExchange type 'tux'")
     print("2. for Poloniex type 'polo'")
     print("3. for Bittrex type 'bit'")
     print("3. for TestExchange type 'test'")
@@ -92,7 +90,6 @@ def validate_merkato_initialization(configuration, coin, base, spread):
 
 def get_relevant_exchange(exchange_name):
     exchange_classes = {
-        'tux': TuxExchange,
         'test': TestExchange,
         'bina': BinanceExchange,
         'krak': KrakenExchange

@@ -78,8 +78,7 @@ class Merkato(object):
         filled_orders = []
         market_orders = []
         
-        if self.exchange.name != 'tux':
-            self.exchange.process_new_transactions(ordered_transactions)
+        self.exchange.process_new_transactions(ordered_transactions)
 
         for tx in ordered_transactions:
             orderid = tx['orderId']
@@ -89,12 +88,8 @@ class Merkato(object):
             filled_amount = Decimal(tx['amount'])
             init_amount   = Decimal(tx['initamount'])
 
-            if self.exchange.name == 'tux':
-                partial_fill_info = self.exchange.get_my_order_info(orderid)
-                init_amount = partial_fill_info['initamount']
-                partial_fill = (partial_fill_info['state'] == 'closed')
-            else:
-                partial_fill = self.exchange.is_partial_fill(orderid) # todo implement for tux (binance done)
+
+            partial_fill = self.exchange.is_partial_fill(orderid) # todo implement for tux (binance done)
 
             total_amount = self.get_total_amount(init_amount, orderid)
             amount = Decimal(total_amount)*Decimal((1-factor))
@@ -236,11 +231,8 @@ class Merkato(object):
 
 
     def get_total_amount(self, init_amount, orderid):
-        if self.exchange.name == "tux":
-            return Decimal(init_amount)
 
-        else:
-            return self.exchange.get_total_amount(orderid) # todo unimplemented on tux
+        return self.exchange.get_total_amount(orderid) # todo unimplemented on tux
 
 
     def decaying_ask_ladder(self, total_amount, step, start_price, hyper=False):
@@ -348,8 +340,7 @@ class Merkato(object):
             self.exchange.market_sell(amount, price)        
                 
         current_history = self.exchange.get_my_trade_history()
-        if self.exchange.name != 'tux':
-            self.exchange.process_new_transactions(current_history)
+        self.exchange.process_new_transactions(current_history)
         market_history  = get_new_history(current_history, last_id_before_market)
         market_data     = get_market_results(market_history)
 

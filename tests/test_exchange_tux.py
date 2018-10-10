@@ -2,7 +2,6 @@ import unittest
 from mock import patch
 from freezegun import freeze_time
 
-from merkato.exchanges.tux_exchange.exchange import TuxExchange
 
 
 class TuxExchangeTestCase(unittest.TestCase):

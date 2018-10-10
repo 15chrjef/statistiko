@@ -12,7 +12,6 @@ from merkato.exchanges.exchange_base import ExchangeBase
 from merkato.constants import BUY, SELL, PRICE, USER_ID, AMOUNT
 from merkato.exchanges.test_exchange.orderbook import Orderbook
 from merkato.exchanges.test_exchange.constants import test_asks, test_bids
-from merkato.exchanges.tux_exchange.utils import translate_ticker
 from merkato.utils.database_utils import get_price_data_from_start
 
 class TestExchange(ExchangeBase):
@@ -20,7 +19,8 @@ class TestExchange(ExchangeBase):
         self.coin = coin
         self.base = base
         self.name = "test"
-        self.ticker = translate_ticker(coin=coin, base=base)
+        self.ticker = coin + base
+        print('starting pirce', starting_price)
         initial_orderbook = get_initial_orderbook(starting_price, config)
         self.orderbook = Orderbook(**initial_orderbook)
         self.user_id = user_id
