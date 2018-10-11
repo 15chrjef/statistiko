@@ -9,12 +9,15 @@ for line in klines:
 	open_price = line[1]
 	high_price = line[2]
 	low_price = line[3]
-	diff1 = abs(float(high_price)-float(open_price))
-	diff2 = abs(float(low_price)-float(open_price))
 
+	open_to_high = float(high_price)-float(open_price)
+	open_to_low = float(low_price)-float(open_price)
+
+	high_closer_than_low = abs(open_to_high) < abs(open_to_low)
+	print(time)
 	#insert_price_data(exchange='bina', price=float(open_price), pair='XMRBTC', date=time)
 
-	if diff1 < diff2:
+	if high_closer_than_low:
 		insert_price_data(exchange='bina', price=float(high_price), pair='XMRBTC', date=time)
 		insert_price_data(exchange='bina', price=float(low_price), pair='XMRBTC', date=time+1)
 
