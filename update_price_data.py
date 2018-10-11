@@ -7,5 +7,19 @@ klines = client.get_historical_klines("XMRBTC", Client.KLINE_INTERVAL_1MINUTE, "
 for line in klines:
 	time = int(str(line[0])[:-3])
 	open_price = line[1]
-	insert_price_data(exchange='bina', price=float(open_price), pair='XMRBTC', date=time)
+	high_price = line[2]
+	low_price = line[3]
+	diff1 = abs(high_price-open_price)
+	diff2 = abs(low_price-open_price)
+
+	print(time)
+	#insert_price_data(exchange='bina', price=float(open_price), pair='XMRBTC', date=time)
+
+	if diff1 < diff2:
+		insert_price_data(exchange='bina', price=float(high_price), pair='XMRBTC', date=time)
+		insert_price_data(exchange='bina', price=float(low_price), pair='XMRBTC', date=time+1)
+
+	else:
+		insert_price_data(exchange='bina', price=float(low_price), pair='XMRBTC', date=time)
+		insert_price_data(exchange='bina', price=float(high_price), pair='XMRBTC', date=time+1)
 
