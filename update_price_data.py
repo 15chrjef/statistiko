@@ -9,8 +9,8 @@ for line in klines:
 	open_price = line[1]
 	high_price = line[2]
 	low_price = line[3]
-	diff1 = abs(high_price-open_price)
-	diff2 = abs(low_price-open_price)
+	diff1 = abs(float(high_price)-float(open_price))
+	diff2 = abs(float(low_price)-float(open_price))
 
 	print(time)
 	#insert_price_data(exchange='bina', price=float(open_price), pair='XMRBTC', date=time)
