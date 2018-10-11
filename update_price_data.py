@@ -3,7 +3,7 @@ from binance.client import Client
 
 
 client = Client('', '')
-klines = client.get_historical_klines("XMRBTC", Client.KLINE_INTERVAL_1MINUTE, "3 weeks ago UTC")
+klines = client.get_historical_klines("XMRBTC", Client.KLINE_INTERVAL_1MINUTE, "1 week ago UTC")
 for line in klines:
 	time = int(str(line[0])[:-3])
 	open_price = line[1]
@@ -12,7 +12,6 @@ for line in klines:
 	diff1 = abs(float(high_price)-float(open_price))
 	diff2 = abs(float(low_price)-float(open_price))
 
-	print(time)
 	#insert_price_data(exchange='bina', price=float(open_price), pair='XMRBTC', date=time)
 
 	if diff1 < diff2:

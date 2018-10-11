@@ -108,7 +108,6 @@ class TestExchange(ExchangeBase):
         # self.debug(3, "test exchange.py gen fake data: new price", self.price)
         new_orders = self.orderbook.generate_fake_orders(self.price)        
         if new_orders:
-            print('sim line', self.simulation_data[self.index])
             self.transaction_history.extend(new_orders)
         self.index = self.index + 1
 
@@ -226,8 +225,11 @@ class TestExchange(ExchangeBase):
 
 
     def get_lowest_ask(self):
-        return self.orderbook.asks[0][PRICE]
-
+        if len(self.orderbook.asks) > 0:
+            return self.orderbook.asks[0][PRICE]
+        return 100000000
 
     def get_highest_bid(self):
-        return self.orderbook.bids[0][PRICE]
+        if len(self.orderbook.bids) > 0:
+            return self.orderbook.bids[0][PRICE]
+        return .000000000001

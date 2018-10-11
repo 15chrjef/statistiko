@@ -51,32 +51,44 @@ class Orderbook:
 
     def resolve_market_order(self, market_type, price):
         resolved_orders = []
-        highest_bid = self.bids[0]
-        lowest_ask = self.asks[0]
+        highest_bid = self.return_highest_bid()
+        lowest_ask = self.return_lowest_ask()
 
         if market_type == ASK:
-            while float(lowest_ask["price"]) < price:
+            while lowest_ask is not None and float(lowest_ask["price"]) < price:
                 old_ask = self.asks[0]
                 self.asks.pop(0)
                 self.add_resolved_order(lowest_ask, resolved_orders)
-                lowest_ask = self.asks[0]
+                lowest_ask = self.return_lowest_ask()
                 self.base += old_ask['total'] * (1- old_ask['feepercent'])
                 self.quote -= old_ask['amount']
         else:
-            while float(highest_bid["price"]) > price:
+            while highest_bid is not None and float(highest_bid["price"]) > price:
                 old_bid = self.bids[0]
                 self.bids.pop(0)
                 self.add_resolved_order(highest_bid, resolved_orders)
-                highest_bid = self.bids[0]
+                highest_bid = self.return_highest_bid()                  
                 self.base -= old_bid['total'] 
                 self.quote += old_bid['amount'] * (1- old_bid['feepercent'])
 
         return resolved_orders
 
+    def return_highest_bid(self):
+        if len(self.bids) > 0:
+            return self.bids[0]  
+        else:
+            return None       
+
+    def return_lowest_ask(self):
+        if len(self.asks) > 0:
+            return self.asks[0] 
+        else:
+            return None
+
     def generate_fake_orders(self, price):
         
-        is_bid_market_order = price < self.bids[0]["price"]
-        is_ask_market_order = price > self.asks[0]["price"]
+        is_bid_market_order = len(self.bids) > 0 and price < self.bids[0]["price"]
+        is_ask_market_order = len(self.asks) > 0 and price > self.asks[0]["price"]
 
         ###
         if(is_ask_market_order):
