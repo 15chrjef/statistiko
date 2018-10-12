@@ -110,7 +110,7 @@ class Merkato(object):
                 coin_amt = base_amt/buy_price
                 # This is the actual number we want to apply, not the original executed amount.
                 amount = coin_amt
-                log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
+                #log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
 
                 market = self.exchange.buy(amount, buy_price)
 
@@ -125,7 +125,7 @@ class Merkato(object):
 
             if tx[TYPE] == BUY:
                 sell_price = Decimal(price) * ( 1  + self.spread)
-                log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
+                #log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
 
                 market = self.exchange.sell(amount, sell_price)
                 
