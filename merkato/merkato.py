@@ -110,7 +110,7 @@ class Merkato(object):
                 coin_amt = base_amt/buy_price
                 # This is the actual number we want to apply, not the original executed amount.
                 amount = coin_amt
-                # log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
+                log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
 
                 market = self.exchange.buy(amount, buy_price)
 
@@ -125,7 +125,7 @@ class Merkato(object):
 
             if tx[TYPE] == BUY:
                 sell_price = Decimal(price) * ( 1  + self.spread)
-                # log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
+                log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
 
                 market = self.exchange.sell(amount, sell_price)
                 
@@ -193,6 +193,7 @@ class Merkato(object):
             
             # TODO Create lock
             response = self.exchange.buy(current_bid_amount, current_bid_price)
+            print('merkato bid', current_bid_amount, current_bid_price)
             self.remove_reserve(current_bid_total, BID_RESERVE) 
             # TODO Release lock
             
@@ -263,6 +264,7 @@ class Merkato(object):
 
             # TODO Create lock
             response = self.exchange.sell(current_ask_amount, current_ask_price)
+            print('distribute ask amount:{} price:{}'.format(current_ask_amount, current_ask_price))
 
             # log.info('ask response {}'.format(response))
 
@@ -293,6 +295,10 @@ class Merkato(object):
     def distribute_initial_orders(self, total_base, total_alt):
         ''' TODO: Function comment
         '''
+        if self.distribution_strategy == 4:
+            self.place_contrived_orders()
+            return
+
         current_price = self.starting_price
         if self.user_interface:
             current_price = Decimal(self.user_interface.confirm_price(current_price))
@@ -304,6 +310,20 @@ class Merkato(object):
         
         self.distribute_bids(bid_start, total_base)
         self.distribute_asks(ask_start, total_alt)
+
+
+    def place_contrived_orders(self):
+        with open('contrived_orderbook.data') as f:
+            for line in f:
+                order = json.loads(line)
+                order_type = order['type']
+                order_amount = order['amount']
+                order_price = order['price']
+
+                if order_type == 'BUY':
+                    self.exchange.buy(order_amount, order_price)
+                elif order_type == 'SELL':
+                    self.exchange.sell(order_amount,order_price)
 
 
     def handle_partial_fill(self, type, filled_qty, tx_id):
