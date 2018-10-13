@@ -10,7 +10,7 @@ from decimal import *
 from merkato.constants import BUY, SELL, ID, PRICE, LAST_ORDER, ASK_RESERVE, BID_RESERVE, EXCHANGE, ONE_BITCOIN, STARTING_PRICE, \
     ONE_SATOSHI, FIRST_ORDER, MARKET, TYPE, QUOTE_VOLUME, BASE_VOLUME
 from merkato.utils.database_utils import update_merkato, insert_merkato, merkato_exists, kill_merkato
-from merkato.utils import validate_merkato_initialization, get_relevant_exchange, \
+from merkato.utils import validate_merkato_initialization, get_relevant_exchange, calculate_remaining_reserve, \
     get_allocated_pair_balances, check_reserve_balances, get_last_order, get_new_history, \
     get_first_order, get_time_of_last_order, get_market_results, log_all_methods
 
@@ -20,7 +20,7 @@ getcontext().prec = 8
 @log_all_methods
 class Merkato(object):
     def __init__(self, configuration, coin, base, spread,
-                 bid_reserved_balance, ask_reserved_balance,
+                 bid_reserved_balance, ask_reserved_balance, increased_orders=0,
                  user_interface=None, profit_margin=0, first_order='', starting_price=.018, quote_volume=0, base_volume=0, step=1.0033, distribution_strategy=1, start=0):
 
         # validate_merkato_initialization(configuration, coin, base, spread)
@@ -34,6 +34,7 @@ class Merkato(object):
         self.quote_volume = Decimal(quote_volume)
         self.base_volume = Decimal(base_volume)
         self.step = step
+        self.increased_orders = increased_orders
         self.first_order = ''
         self.last_order = ''
         # Exchanges have a maximum number of orders every user can place. Due
@@ -110,7 +111,7 @@ class Merkato(object):
                 coin_amt = base_amt/buy_price
                 # This is the actual number we want to apply, not the original executed amount.
                 amount = coin_amt
-                #log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
+                log.info("Found sell {} corresponding buy price: {} amount: {}".format(price, buy_price, amount))
 
                 market = self.exchange.buy(amount, buy_price)
 
@@ -125,7 +126,7 @@ class Merkato(object):
 
             if tx[TYPE] == BUY:
                 sell_price = Decimal(price) * ( 1  + self.spread)
-                #log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
+                log.info("Found buy {} corresponding sell price: {} amount: {}".format(price, sell_price, amount))
 
                 market = self.exchange.sell(amount, sell_price)
                 
@@ -183,11 +184,17 @@ class Merkato(object):
 
         current_order = 0
         amount = 0
+        total = 0
         prior_reserve = self.bid_reserved_balance
+        amount_for_main_orders = calculate_remaining_reserve(total_amount, self.increased_orders, step, scaling_factor)
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
+            if current_order < self.increased_orders:
+                current_bid_total = Decimal(total_amount/(scaling_factor * step_adjusted_factor)) * Decimal(1.5)
+            else:
+                current_bid_total =  Decimal(Decimal(amount_for_main_orders)/(scaling_factor * step_adjusted_factor))
+            total += float(current_bid_total)
             current_bid_price = Decimal(start_price/step_adjusted_factor)
-            current_bid_total = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))
             current_bid_amount = Decimal(Decimal(total_amount)/(scaling_factor * step_adjusted_factor))/current_bid_price
             amount += current_bid_amount
             
@@ -198,6 +205,7 @@ class Merkato(object):
             
             current_order += 1
             self.avoid_blocking()
+        print('total bid', total)
 
 
     def handle_is_in_filled_orders(self, tx):
@@ -255,9 +263,13 @@ class Merkato(object):
         amount = 0
 
         prior_reserve = self.ask_reserved_balance
+        amount_for_main_orders = calculate_remaining_reserve(total_amount, self.increased_orders, step, scaling_factor)
         while current_order < total_orders:
             step_adjusted_factor = Decimal(step**current_order)
-            current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor)
+            if current_order < self.increased_orders:
+                current_ask_amount = total_amount/(scaling_factor * step_adjusted_factor) * Decimal(1.5)
+            else:
+                current_ask_amount = amount_for_main_orders /(scaling_factor * step_adjusted_factor)
             current_ask_price = start_price*step_adjusted_factor
             amount += current_ask_amount
 
@@ -271,7 +283,7 @@ class Merkato(object):
 
             current_order += 1
             self.avoid_blocking()
-
+        print('ask amount', amount)
         # log.info('allocated amount: {}'.format(prior_reserve - self.ask_reserved_balance))
 
 

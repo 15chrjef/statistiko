@@ -25,12 +25,6 @@ def apply_resolved_orders(current_accounts, resolved_orders):
 
 def get_initial_orderbook(start, exchange_config):
     config = {}
-    new_bids = copy.deepcopy(test_bids)
-    new_asks = copy.deepcopy(test_asks)
-    new_asks[0]['price'] = float(start) + .1
-    new_bids[0]['price'] = float(start) - .01
-    config['asks'] = new_asks
-    config['bids'] = new_bids
     config['start_quote'] = exchange_config['start_quote']
     config['start_base'] = exchange_config['start_base']
     print('config', config)

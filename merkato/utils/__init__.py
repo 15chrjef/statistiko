@@ -3,7 +3,8 @@ from merkato.exchanges.test_exchange.exchange import TestExchange
 from merkato.exchanges.binance_exchange.exchange import BinanceExchange
 from merkato.exchanges.kraken_exchange.exchange import KrakenExchange
 from merkato.constants import known_exchanges
-from merkato.utils.database_utils import get_exchange as get_exchange_from_db, get_merkatos_by_exchange, get_merkato
+from merkato.utils.database_utils import get_exchange as get_exchange_from_db, get_merkatos_by_exchange, get_merkato, get_first_price_after_time
+
 import base64
 import time
 
@@ -225,3 +226,28 @@ def log_all_methods(cls):
         if callable(attr):
             setattr(cls, name, log_on_call(attr))
     return cls
+
+def calculate_remaining_reserve(total_reserve, orders_to_increase, step, scaling_factor):
+    current_order = 0
+    remaining_reserve = total_reserve
+    while current_order < orders_to_increase:
+        step_adjusted_factor = Decimal(step**current_order)
+        current_ask_amount = total_reserve/(scaling_factor * step_adjusted_factor) * Decimal(.62)
+        remaining_reserve -= current_ask_amount
+        current_order += 1
+    return remaining_reserve
+
+def get_increased_orders():
+    print('Number of 50% amount increased orders?')
+    print('SUGGESTED IS 0, 1 ,or 2')
+    return int(input('Selection: '))
+
+def get_start_and_starting_price():
+    print('What should be the start date for the tuner (EPOCH)')
+    start = input('selection: ')
+    return (start, get_first_price_after_time(start)[0][3])
+
+def get_confirmed_start_price(starting_price):
+    print('The starting price is: {}'.format(starting_price))
+    print('Submit the price below for confirmation, OR input a different price to be used')
+    return input('Selection: ')

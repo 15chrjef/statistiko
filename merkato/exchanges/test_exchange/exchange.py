@@ -47,8 +47,6 @@ class TestExchange(ExchangeBase):
 
     def load_history(self, start):
         output_set = get_price_data_from_start(start)
-        print('first', output_set[0])
-        print('last', output_set[len(output_set) - 1])
         for data in output_set:
             obj = {}
             (_,_,timestamp,price) = data

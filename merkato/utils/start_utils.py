@@ -32,8 +32,8 @@ def get_tuner_distribution_strategy():
     return strat
 
 
-def start_tuner(step, spread, start_base, start_quote, distribution_strategy, start, start_price):
-    config = generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start, start_price)
+def start_tuner(step, spread, start_base, start_quote, distribution_strategy, start, start_price, increased_orders):
+    config = generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start, start_price, increased_orders)
 
     tuner = Merkato(**config)
     done = False
@@ -50,7 +50,7 @@ def start_tuner(step, spread, start_base, start_quote, distribution_strategy, st
             done = True
             return abs_q_profit, abs_b_profit
             
-def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start, start_price):
+def generate_tuner_config(step, spread, start_base, start_quote, distribution_strategy, start, start_price, increased_orders):
     config = {}
     inner_config = {"limit_only": True}
     
@@ -72,5 +72,6 @@ def generate_tuner_config(step, spread, start_base, start_quote, distribution_st
     config['step'] = step
     config['base_volume'] = 0
     config['distribution_strategy'] = distribution_strategy
+    config['increased_orders'] = increased_orders
 
     return config

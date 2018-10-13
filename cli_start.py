@@ -1,8 +1,8 @@
 from merkato.merkato_config import load_config, get_config, create_config
 from merkato.parser import parse
 from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, insert_price_data, drop_merkatos_table, \
-drop_exchanges_table, insert_exchange, get_all_exchanges, no_price_data_table_exists, create_price_data_table, get_first_price_after_time
-from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange
+drop_exchanges_table, insert_exchange, get_all_exchanges, no_price_data_table_exists, create_price_data_table
+from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange, get_increased_orders, get_start_and_starting_price, get_confirmed_start_price
 from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner, get_tuner_distribution_strategy
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
@@ -194,24 +194,17 @@ class Application(tk.Frame):
         quote = 1064.21
         distribution_strategy = get_tuner_distribution_strategy()
         results = []
-        print('What should be the start date for the tuner (EPOCH)')
-        start = input('selection: ')
-        starting_price = get_first_price_after_time(start)[0][3]
-        print('The starting price is: {}'.format(starting_price))
-        print('Submit the price below for confirmation, OR input a different price to be used')
-        confirmed_start_price = input('Selection: ')
-        print("test")
-        for step_mult in range(0,15):
-            step = 1.06 + .005*step_mult
+        (start, starting_price) = get_start_and_starting_price()
+        confirmed_start_price = get_confirmed_start_price(starting_price)
+        increased_orders = get_increased_orders()
+        for step_mult in range(0,25):
+            step = 1.02 + .005*step_mult
 
             for spread_mult in range(0,25):
                 spread = .02+spread_mult*.005
-                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price)
+                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price, increased_orders)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
-                with open('tuner_results.json', 'a') as outfile:
-                    json.dump(result, outfile)
-                    outfile.write(",\n")
                 print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
 
         print("Format: (step, spread, qprofit, bprofit)")
@@ -229,13 +222,11 @@ class Application(tk.Frame):
         base = get_tuner_params_base()
         quote = get_tuner_params_quote()
         distribution_strategy = get_tuner_distribution_strategy()
-        print('What should be the start date for the tuner (EPOCH)')
-        start = input('selection: ')
-        starting_price = get_first_price_after_time(start)[0][3]
-        print('The starting price is: {}'.format(starting_price))
-        print('Submit the price below for confirmation, OR input a different price to be used')
-        confirmed_start_price = input('Selection: ')
-        start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price)
+        (start, starting_price) = get_start_and_starting_price()
+        confirmed_start_price = get_confirmed_start_price(starting_price)
+        increased_orders = get_increased_orders()
+
+        start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price, increased_orders)
 
 
     def start_statistikos(self):
