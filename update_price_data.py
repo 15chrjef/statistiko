@@ -3,7 +3,7 @@ from binance.client import Client
 
 
 client = Client('', '')
-klines = client.get_historical_klines("XMRBTC", Client.KLINE_INTERVAL_1MINUTE, "2 days ago UTC")
+klines = client.get_historical_klines("XMRBTC", Client.KLINE_INTERVAL_1MINUTE, "6 year ago UTC", "5 months ago UTC")
 for line in klines:
 	time = int(str(line[0])[:-3])
 	open_price = line[1]

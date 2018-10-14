@@ -197,15 +197,20 @@ class Application(tk.Frame):
         (start, starting_price) = get_start_and_starting_price()
         confirmed_start_price = get_confirmed_start_price(starting_price)
         increased_orders = get_increased_orders()
-        for step_mult in range(0,25):
+        for step_mult in range(0,16):
             step = 1.02 + .005*step_mult
 
-            for spread_mult in range(0,25):
+            for spread_mult in range(0,20):
                 spread = .02+spread_mult*.005
+                if step - 1 > spread:
+                    continue
                 (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price, increased_orders)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
                 print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
+                with open('tuner_results.json', 'a') as outfile:
+                    json.dump(result, outfile)
+                    outfile.write(",\n")
 
         print("Format: (step, spread, qprofit, bprofit)")
         print("------------------------------------------------")
