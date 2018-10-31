@@ -12,7 +12,7 @@ from merkato.exchanges.exchange_base import ExchangeBase
 from merkato.constants import BUY, SELL, PRICE, USER_ID, AMOUNT
 from merkato.exchanges.test_exchange.orderbook import Orderbook
 from merkato.exchanges.test_exchange.constants import test_asks, test_bids
-from merkato.utils.database_utils import get_price_data_from_start
+from merkato.utils.database_utils import get_price_data_in_range
 
 class TestExchange(ExchangeBase):
     def __init__(self, config, coin, base, user_id=20, accounts=None, price = 1, password='password', limit_only=True, starting_price=0):
@@ -34,7 +34,7 @@ class TestExchange(ExchangeBase):
         self.index = 0
         self.start = starting_price
         print(config)
-        self.load_history(config['start'])
+        self.load_history(config['start'], config['end'])
         
     def debug(self, level, header, *args):
         if level <= self.DEBUG:
@@ -45,8 +45,8 @@ class TestExchange(ExchangeBase):
             print("-" * 10)
 
 
-    def load_history(self, start):
-        output_set = get_price_data_from_start(start)
+    def load_history(self, start, end):
+        output_set = get_price_data_in_range(start, end)
         for data in output_set:
             obj = {}
             (_,_,timestamp,price) = data

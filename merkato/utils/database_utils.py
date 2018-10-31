@@ -190,7 +190,7 @@ def insert_price_data(exchange, price, pair='XMRBTC', date=1):
         conn.commit()
         conn.close()
 
-def get_price_data_in_range(start, end):
+def get_price_data_in_range(start, end, exchange="bina", pair="XMRBTC"):
     ''' TODO: Function Comment
     '''
     try:
@@ -202,7 +202,7 @@ def get_price_data_in_range(start, end):
 
     finally:
         c = conn.cursor()
-        c.execute("SELECT * FROM price_data WHERE date >= ? and date <= ?", (start, end))
+        c.execute("SELECT * FROM price_data WHERE date >= ? and date <= ? AND exchange = ? AND pair = ? ORDER BY date ASC", (start, end, exchange, pair))
         price_data_results = c.fetchall()
         conn.commit()
         conn.close()

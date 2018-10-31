@@ -250,4 +250,17 @@ def get_start_and_starting_price():
 def get_confirmed_start_price(starting_price):
     print('The starting price is: {}'.format(starting_price))
     print('Submit the price below for confirmation, OR input a different price to be used')
-    return input('Selection: ')
+    selection = input('Selection: ')
+    if selection == '':
+        return starting_price
+    else:
+        return selection
+
+def get_end_date():
+    should_get_date = input('Would you like to have an endate? y/n : ')
+    if should_get_date == 'y':
+        end_date = input('What end date would you like to have? (EPOCH): ')
+        return float(end_date)
+    else:
+        future_time = 2006780800
+        return future_time

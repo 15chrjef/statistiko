@@ -2,7 +2,7 @@ from merkato.merkato_config import load_config, get_config, create_config
 from merkato.parser import parse
 from merkato.utils.database_utils import no_merkatos_table_exists, create_merkatos_table, insert_merkato, get_all_merkatos, get_exchange, no_exchanges_table_exists, create_exchanges_table, insert_price_data, drop_merkatos_table, \
 drop_exchanges_table, insert_exchange, get_all_exchanges, no_price_data_table_exists, create_price_data_table
-from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange, get_increased_orders, get_start_and_starting_price, get_confirmed_start_price
+from merkato.utils import generate_complete_merkato_configs, ensure_bytes, encrypt, decrypt, get_relevant_exchange, get_increased_orders, get_start_and_starting_price, get_confirmed_start_price, get_end_date
 from merkato.utils.start_utils import get_tuner_params_spread, get_tuner_params_step, get_tuner_params_base, get_tuner_params_quote, start_tuner, get_tuner_distribution_strategy
 from merkato.exchanges.binance_exchange.utils import validate_keys
 from merkato.exchanges.kraken_exchange.utils import validate_kraken
@@ -79,8 +79,10 @@ def insert_config_into_exchanges(config):
     insert_exchange(exchange, public_key, private_key, limit_only)
 
 
-def graph_results(results):
+def graph_results(results, start, end):
 
+    real_start = time.strftime("%Z - %Y/%m/%d, %H:%M:%S", time.localtime(int(start)))
+    real_end = time.strftime("%Z - %Y/%m/%d, %H:%M:%S", time.localtime(int(end)))
     bad_chars = '()'
     data = []
     candidate_list = []
@@ -110,7 +112,6 @@ def graph_results(results):
     x, y, q, b = zip(*data)
 
     mult = tuple([current_price*x for x in q])
-    #print(mult)
     z = tuple(map(sum, zip(mult, b)))
     z = list(map(float, z))
     grid_x, grid_y = np.mgrid[min(x):max(x):100j, min(y):max(y):100j]
@@ -118,6 +119,7 @@ def graph_results(results):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     ax.plot_surface(grid_x, grid_y, grid_z, cmap=plt.cm.Spectral)
+    plt.title(real_start + ' - ' + real_end)
     plt.show()
 
 
@@ -196,15 +198,16 @@ class Application(tk.Frame):
         results = []
         (start, starting_price) = get_start_and_starting_price()
         confirmed_start_price = get_confirmed_start_price(starting_price)
+        end = get_end_date()
         increased_orders = get_increased_orders()
-        for step_mult in range(0,16):
+        for step_mult in range(0,20):
             step = 1.02 + .005*step_mult
 
             for spread_mult in range(0,20):
-                spread = .02+spread_mult*.005
+                spread = .01+spread_mult*.005
                 if step - 1 > spread:
                     continue
-                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price, increased_orders)
+                (q_profit, b_profit) = start_tuner(step, spread, base, quote, distribution_strategy, start, confirmed_start_price, increased_orders, end)
                 result = [str(step), str(spread), q_profit, b_profit]
                 results.append(result)
                 print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
@@ -218,7 +221,7 @@ class Application(tk.Frame):
             #print('Spread: {} q profit: {} b profit:{} \n'.format(result[0], result[1], result[2]))
             print("("+str(result[0])+","+str(result[1])+","+str(result[2])+","+str(result[3])+")")
 
-        graph_results(results)
+        graph_results(results, start, end)
 
 
     def handle_start_tuner(self):
