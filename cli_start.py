@@ -120,6 +120,9 @@ def graph_results(results, start, end):
     ax = fig.gca(projection='3d')
     ax.plot_surface(grid_x, grid_y, grid_z, cmap=plt.cm.Spectral)
     plt.title(real_start + ' - ' + real_end)
+    ax.set_xlabel('Step')
+    ax.set_ylabel('Spread')
+    ax.set_zlabel('Profit(BTC)')
     plt.show()
 
 
