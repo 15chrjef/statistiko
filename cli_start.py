@@ -114,11 +114,11 @@ def graph_results(results, start, end):
     mult = tuple([current_price*x for x in q])
     z = tuple(map(sum, zip(mult, b)))
     z = list(map(float, z))
-    grid_x, grid_y = np.mgrid[min(x):max(x):100j, min(y):max(y):100j]
-    grid_z = griddata((x, y), z, (grid_x, grid_y), method='cubic')
+    step_grid, spread_grid = np.mgrid[min(x):max(x):100j, min(y):max(y):100j]
+    profit_grid = griddata((x, y), z, (step_grid, spread_grid), method='cubic')
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    ax.plot_surface(grid_x, grid_y, grid_z, cmap=plt.cm.Spectral)
+    ax.plot_surface(step_grid, spread_grid, profit_grid, cmap=plt.cm.Spectral)
     plt.title(real_start + ' - ' + real_end)
     ax.set_xlabel('Step')
     ax.set_ylabel('Spread')
